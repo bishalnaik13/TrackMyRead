@@ -54,30 +54,9 @@ export default function HomeScreen({ navigation, books = [], setBooks }) {
   }
 
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={styles.screen}>
-      <View style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 12,
-        paddingTop: 10,
-      }}>
-        <Text style={{
-          color: colors.text,
-          fontSize: 16,
-          fontWeight: '600',
-        }}>Dark Mode</Text>
-        <Switch
-          trackColor={{ false: colors.tint, true: colors.primary }}
-          thumbColor={theme === 'dark' ? colors.primary : colors.card}
-          onValueChange={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-          value={theme === 'dark'}
-      />
-      </View>
-
+    <SafeAreaView edges={["left", "right"]} style={styles.screen}>
       {/* Search box */}
-      <View style={[styles.searchWrapper, { margin: 12 }]}
-      >
+      <View style={[styles.searchWrapper, { margin: 12 }]}>
         <TextInput
           placeholder="Search by title or author"
           placeholderTextColor={colors.tint}

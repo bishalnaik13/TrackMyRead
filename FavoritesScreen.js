@@ -17,7 +17,10 @@ export default function FavoritesScreen({ books = [], setBooks, navigation }) {
   }
 
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={styles.screen}>
+    <SafeAreaView 
+    edges={["left", "right"]} 
+    style={styles.screen}
+    >
       {favs.length === 0 ? (
         <View style={styles.empty}>
           <Text style={styles.emptyTitle}>No favorites yet</Text>

@@ -7,26 +7,42 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { TouchableOpacity } from 'react-native';
 
 import HomeScreen from './HomeScreen';
 import DetailsScreen from './DetailsScreen';
 import FavoritesScreen from './FavoritesScreen';
+import SettingsScreen from './SettingsScreen';
+import AboutScreen from './AboutScreen';
+
 import { ThemeContext } from './ThemeContext';
 import { lightColors, darkColors } from './styles';
 
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
 
-function HomeStack({ books, setBooks, theme }) {
+function HomeStack({ navigation: parentNav, books, setBooks, theme }) {
   const colors = theme === 'dark' ? darkColors : lightColors;
   return (
-    <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: colors.card }, headerTintColor: colors.text }}>
-      <Stack.Screen name="HomeList" options={{ headerShown: false }}>
-        {(props) => <HomeScreen {...props} books={books} setBooks={setBooks} />}
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: colors.card },
+        headerTintColor: colors.text,
+        headerTitleAlign: 'center',
+        headerLeft: ({ tintColor }) => (
+          <TouchableOpacity onPress={() => parentNav?.getParent()?.openDrawer()} style={{ paddingLeft: 12 }}>
+            <Ionicons name="menu" size={24} color={colors.text} />
+          </TouchableOpacity>
+        )
+      }}>
+      <Stack.Screen name="HomeList" options={{ title: "My Books" }}>
+        {(props) => <HomeScreen {...props} books={books} setBooks={setBooks} theme={theme} />}
       </Stack.Screen>
       <Stack.Screen name="Details" options={{ title: "Details" }}>
-        {(props) => <DetailsScreen {...props} books={books} setBooks={setBooks} />}
+        {(props) => <DetailsScreen {...props} books={books} setBooks={setBooks} theme={theme} />}
       </Stack.Screen>
     </Stack.Navigator>
   );
@@ -72,6 +88,18 @@ export default function App() {
     })();
   }, [theme]);
 
+  const navTheme = {
+    dark: theme === 'dark',
+    colors: {
+      primary: (theme === 'dark' ? darkColors.primary : lightColors.primary),
+      background: (theme === 'dark' ? darkColors.background : lightColors.background),
+      card: (theme === 'dark' ? darkColors.card : lightColors.card),
+      text: (theme === 'dark' ? darkColors.text : lightColors.text),
+      border: (theme === 'dark' ? darkColors.neutral : lightColors.neutral),
+      notification: (theme === 'dark' ? darkColors.accent : lightColors.accent),
+    },
+  };
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeContext.Provider value={{ theme, setTheme }}>
@@ -94,24 +122,47 @@ export default function App() {
 
           return (
             <NavigationContainer theme={navTheme}>
-              <Tab.Navigator
-                screenOptions={({ route }) => ({
+              <Drawer.Navigator
+                initialRouteName="Main"
+                screenOptions={{
                   headerShown: false,
-                  tabBarActiveTintColor: navTheme.colors.primary,
-                  tabBarInactiveTintColor: navTheme.colors.text,
-                  tabBarStyle: { backgroundColor: navTheme.colors.card },
-                  tabBarIcon: ({ focused, color, size }) => (
-                    <Ionicons name={getIconName(route.name, focused)} size={size} color={color} />
-                  ),
-                })}
+                  headerTitleAlign: 'center',
+                  drawerPosition: 'left',
+                  drawerStyle: { width: '70%' },
+                  overlayColor: 'rgba(0,0,0,0.35)',
+                }}
               >
-                <Tab.Screen name="Home">
-                  {(props) => <HomeStack {...props} books={books} setBooks={setBooks} theme={theme} />}
-                </Tab.Screen>
-                <Tab.Screen name="Favorites">
-                  {(props) => <FavoritesScreen {...props} books={books} setBooks={setBooks} />}
-                </Tab.Screen>
-              </Tab.Navigator>
+                <Drawer.Screen name="Main">
+                  {() => (
+                    <Tab.Navigator
+                      screenOptions={({ route }) => ({
+                        headerShown: false,
+                        headerTitleAlign: 'center',
+                        tabBarActiveTintColor: navTheme.colors.primary,
+                        tabBarInactiveTintColor: navTheme.colors.text,
+                        tabBarStyle: { backgroundColor: navTheme.colors.card },
+                        tabBarIcon: ({ focused, color, size }) => (
+                          <Ionicons name={getIconName(route.name, focused)} size={size} color={color} />
+                        ),
+                      })}
+                    >
+                      <Tab.Screen name="Home">
+                        {(props) => <HomeStack {...props} books={books} setBooks={setBooks} theme={theme} />}
+                      </Tab.Screen>
+                      <Tab.Screen name="Favorites" options={{headerShown: true}}>
+                        {(props) => <FavoritesScreen {...props} books={books} setBooks={setBooks} />}
+                      </Tab.Screen>
+                    </Tab.Navigator>
+                  )}
+                </Drawer.Screen>
+                <Drawer.Screen name="Settings">
+                  {(props) => <SettingsScreen {...props} />}
+                </Drawer.Screen>
+                <Drawer.Screen name="About">
+                  {(props) => <AboutScreen {...props} />}
+                </Drawer.Screen>
+              </Drawer.Navigator>
+
               <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
             </NavigationContainer>
           );
@@ -119,34 +170,6 @@ export default function App() {
       </ThemeContext.Provider>
 
     </GestureHandlerRootView>
-
-    // {/* <Navigation /> */}
-    // {/* <Text>Helloo!</Text> */}
-    // </View>
   );
 }
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#fff',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   AddButton: {
-//     position: 'absolute',
-//     right:20,
-//     bottom:28,
-//     backgroundColor: '#007AFF',
-//     width:56,
-//     height:56,
-//     borderRadius:28,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     shadowColor: '#000',
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.3,
-//     shadowRadius: 3.84,
-//     elevation: 5,
-//   }
-// })

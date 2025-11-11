@@ -17,8 +17,8 @@ const lightColors = {
 const darkColors = {
   background: '#121212', // dark grey, not pure black
   text: '#e6e6e6',
-  card: '#1e1e1e',
-  placeholder: '#141516',
+  card: '#282828ff',
+  placeholder: '#2a2a2aff',
   primary: '#0A84FF',
   tint: '#9ca3af',
   accent: '#E91E63',
@@ -31,7 +31,11 @@ function makeStyles(themeName = 'light') {
   const colors = themeName === 'dark' ? darkColors : lightColors;
 
   return StyleSheet.create({
-    screen: { flex: 1, backgroundColor: colors.background },
+    screen: { 
+      flex: 1, 
+      backgroundColor: colors.background,
+      // headerShown: true,
+    },
 
     empty: { flex: 1, alignItems: 'center', justifyContent: 'center' },
     emptyTitle: { fontSize: 20, fontWeight: '600', marginBottom: 6, color: colors.text },
@@ -76,7 +80,7 @@ function makeStyles(themeName = 'light') {
     // Search bar wrapper and input. Use a slightly different background for the search bar to
     // visually separate it from cards. Placeholder color is handled via placeholderTextColor prop.
     searchWrapper: {
-      borderRadius: 10,
+      borderRadius: 20,
       overflow: 'hidden',
       backgroundColor: colors.card,
       borderWidth: 1,
@@ -130,79 +134,3 @@ export { lightColors, darkColors };
 
 
 
-// export default StyleSheet.create({
-//   screen: { flex: 1, backgroundColor: '#fff' },
-//   empty: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-//   emptyTitle: { fontSize: 20, fontWeight: '600', marginBottom: 6 },
-//   emptySubtitle: { color: '#666' },
-
-//   fab: {
-//     position: 'absolute',
-//     right: 20,
-//     bottom: 28,
-//     backgroundColor: '#007AFF',
-//     width: 58,
-//     height: 58,
-//     borderRadius: 29,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     elevation: 6,
-//   },
-  
-
-//   modalWrapper: { flex: 1, justifyContent: 'flex-end' },
-//   modal: {
-//     backgroundColor: '#fff',
-//     borderTopLeftRadius: 14,
-//     borderTopRightRadius: 14,
-//     padding: 16,
-//     maxHeight: '85%',
-//     elevation: 8,
-//   },
-//   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-//   modalTitle: { fontSize: 18, fontWeight: '600' },
-
-//   input: {
-//     borderWidth: 1,
-//     borderColor: '#E6E6E6',
-//     borderRadius: 8,
-//     paddingHorizontal: 12,
-//     paddingVertical: 10,
-//     marginTop: 10,
-//     backgroundColor: '#FAFAFA',
-//   },
-
-//   row: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 },
-//   button: {
-//     flex: 1,
-//     paddingVertical: 12,
-//     marginHorizontal: 6,
-//     borderRadius: 8,
-//     alignItems: 'center',
-//   },
-//   buttonText: { color: '#fff', fontWeight: '600' },
-
-//   card: {
-//     flexDirection: 'row',
-//     backgroundColor: '#FFF',
-//     borderRadius: 10,
-//     padding: 12,
-//     marginBottom: 10,
-//     elevation: 2,
-//     alignItems: 'center',
-//   },
-//   cardLeft: { marginRight: 12 },
-//   coverPlaceholder: {
-//     width: 56,
-//     height: 80,
-//     backgroundColor: '#007AFF',
-//     borderRadius: 6,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   cardRight: { flex: 1 },
-//   cardTitle: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
-//   cardMeta: { color: '#666' },
-//   cardMetaSmall: { color: '#999', marginTop: 4 },
-//   cardNotes: { color: '#444', marginTop: 8 },
-// });
