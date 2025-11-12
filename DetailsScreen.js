@@ -1,17 +1,15 @@
 // ...existing code...
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { getStyles, getColors } from './styles';
-import { ThemeContext } from './ThemeContext';
 
-export default function DetailsScreen({ route, navigation, books = [], setBooks }) {
+export default function DetailsScreen({ route, navigation, books = [], setBooks, theme }) {
   const { bookId } = route.params || {};
   const book = books.find(b => b.id === bookId) || null;
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(book ? book.title : '');
-  const { theme } = useContext(ThemeContext);
   const styles = getStyles(theme);
   const colors = getColors(theme);
 

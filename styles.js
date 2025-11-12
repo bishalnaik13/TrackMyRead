@@ -17,8 +17,8 @@ const lightColors = {
 const darkColors = {
   background: '#121212', // dark grey, not pure black
   text: '#e6e6e6',
-  card: '#282828ff',
-  placeholder: '#2a2a2aff',
+  card: '#282828',
+  placeholder: '#2a2a2a',
   primary: '#0A84FF',
   tint: '#9ca3af',
   accent: '#E91E63',
@@ -31,10 +31,9 @@ function makeStyles(themeName = 'light') {
   const colors = themeName === 'dark' ? darkColors : lightColors;
 
   return StyleSheet.create({
-    screen: { 
-      flex: 1, 
+    screen: {
+      flex: 1,
       backgroundColor: colors.background,
-      // headerShown: true,
     },
 
     empty: { flex: 1, alignItems: 'center', justifyContent: 'center' },
@@ -77,8 +76,8 @@ function makeStyles(themeName = 'light') {
       color: colors.text,
     },
 
-    // Search bar wrapper and input. Use a slightly different background for the search bar to
-    // visually separate it from cards. Placeholder color is handled via placeholderTextColor prop.
+  // Search bar wrapper and input. Use a slightly different background for the search bar to
+  // visually separate it from cards. Placeholder color is handled via placeholderTextColor prop.
     searchWrapper: {
       borderRadius: 20,
       overflow: 'hidden',

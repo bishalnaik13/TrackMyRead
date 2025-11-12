@@ -4,10 +4,8 @@ import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { getStyles, getColors } from './styles';
-import { ThemeContext } from './ThemeContext';
 
-export default function FavoritesScreen({ books = [], setBooks, navigation }) {
-  const { theme } = React.useContext(ThemeContext);
+export default function FavoritesScreen({ books = [], setBooks, navigation, theme }) {
   const styles = getStyles(theme);
   const colors = getColors(theme);
   const favs = books.filter(b => b.favorite);

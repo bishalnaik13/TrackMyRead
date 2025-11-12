@@ -4,16 +4,12 @@ import { View, Text, TouchableOpacity, Modal, TextInput, FlatList, KeyboardAvoid
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { getStyles, getColors } from './styles';
-import { ThemeContext } from './ThemeContext';
-import { Switch } from 'react-native-gesture-handler';
 
-export default function HomeScreen({ navigation, books = [], setBooks }) {
+export default function HomeScreen({ navigation, books = [], setBooks, theme }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [query, setQuery] = useState('');
-
-  const { theme, setTheme } = React.useContext(ThemeContext);
 
   const styles = getStyles(theme);
   const colors = getColors(theme);
@@ -86,7 +82,7 @@ export default function HomeScreen({ navigation, books = [], setBooks }) {
       )}
 
       <TouchableOpacity style={styles.fab} onPress={() => setModalVisible(true)}>
-        <Ionicons name="add" size={28} color="#fff" />
+        <Ionicons name="add" size={28} color={colors.buttonText} />
       </TouchableOpacity>
 
       <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
