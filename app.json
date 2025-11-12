@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "BookTrackerApp",
-    "slug": "BookTrackerApp",
+    "name": "TrackMyRead",
+    "slug": "trackmyread",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -23,7 +23,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.BookTrackerApp"
+      "package": "com.anonymous.TrackMyRead"
     },
     "web": {
       "favicon": "./assets/favicon.png"
