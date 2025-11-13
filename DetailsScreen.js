@@ -1,4 +1,3 @@
-// ...existing code...
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -39,7 +38,7 @@ export default function DetailsScreen({ route, navigation, books = [], setBooks,
   }
 
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={[styles.screen, { padding: 12 }] }>
+    <SafeAreaView edges={["top", "left", "right"]} style={[styles.screen, { padding: 12 }]}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text }}>{book.title}</Text>
         <TouchableOpacity onPress={toggleFavorite}>
@@ -56,7 +55,14 @@ export default function DetailsScreen({ route, navigation, books = [], setBooks,
             <TouchableOpacity style={styles.buttonPrimary} onPress={saveEdit}>
               <Text style={styles.buttonText}>Save</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.buttonNeutral} onPress={() => setEditing(false)}>
+            <TouchableOpacity
+              style={styles.buttonNeutral}
+              onPress={() => {
+                setEditing(false);
+                setTitle(book.title);
+                setAuthor(book.author);
+                setNotes(book.notes);
+              }}>
               <Text style={[styles.buttonText, { color: colors.text }]}>Cancel</Text>
             </TouchableOpacity>
           </View>

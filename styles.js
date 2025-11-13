@@ -119,14 +119,14 @@ function makeStyles(themeName = 'light') {
   });
 }
 
-const currentScheme = Appearance.getColorScheme() || 'light';
-const styles = makeStyles(currentScheme);
+// const currentScheme = Appearance.getColorScheme() || 'light';
+// const styles = makeStyles(currentScheme);
 
 export { makeStyles as getStyles };
 export function getColors(themeName = 'light') {
   return themeName === 'dark' ? darkColors : lightColors;
 }
-export default styles;
+// export default styles;
 export { lightColors, darkColors };
 
 

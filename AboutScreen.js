@@ -55,7 +55,7 @@ export default function AboutScreen() {
           <Text style={{ color: colors.text, fontSize: 16, marginBottom: 8 }}>Credits & Acknowledgements</Text>
 
           <Text style={{ color: colors.text, marginBottom: 6 }}>
-            Made with <Text style={{ color: colors.accent }}>❤️</Text> by Your Name
+            Made with <Text style={{ color: colors.accent }}>❤️</Text> by Bishal Naik.
           </Text>
 
           <Text style={{ color: colors.text, marginBottom: 6 }}>
