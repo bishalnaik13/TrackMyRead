@@ -1,15 +1,18 @@
 // ...existing code...
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, TouchableOpacity, Modal, TextInput, FlatList, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { getStyles, getColors } from './styles';
+import { ThemeContext } from './ThemeContext';
 
-export default function HomeScreen({ navigation, books = [], setBooks, theme }) {
+export default function HomeScreen({ navigation, books = [], setBooks}) {
   const [modalVisible, setModalVisible] = useState(false);
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [query, setQuery] = useState('');
+
+  const { theme } = useContext(ThemeContext);
 
   const styles = getStyles(theme);
   const colors = getColors(theme);
@@ -24,7 +27,13 @@ export default function HomeScreen({ navigation, books = [], setBooks, theme }) 
 
   function addBook() {
     if (!title.trim()) return;
-    const newBook = { id: Date.now().toString(), title: title.trim(), author: author.trim(), favorite: false };
+    const newBook = { 
+      id: Date.now().toString(), 
+      title: title.trim(), 
+      author: author.trim(), 
+      favorite: false, 
+      status: 'To Read'
+    };
     setBooks(prev => [newBook, ...prev]);
     resetForm();
     setModalVisible(false);

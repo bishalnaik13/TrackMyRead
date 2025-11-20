@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import React from 'react';
+import React, { useContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -24,7 +24,8 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
-function HomeStack({ navigation: parentNav, books, setBooks, theme }) {
+function HomeStack({ navigation: parentNav, books, setBooks }) {
+  const { theme } = useContext(ThemeContext);
   const colors = theme === 'dark' ? darkColors : lightColors;
   return (
     <Stack.Navigator
@@ -39,10 +40,10 @@ function HomeStack({ navigation: parentNav, books, setBooks, theme }) {
         )
       }}>
       <Stack.Screen name="HomeList" options={{ title: "My Books" }}>
-        {(props) => <HomeScreen {...props} books={books} setBooks={setBooks} theme={theme} />}
+        {(props) => <HomeScreen {...props} books={books} setBooks={setBooks} />}
       </Stack.Screen>
       <Stack.Screen name="Details" options={{ title: "Details" }}>
-        {(props) => <DetailsScreen {...props} books={books} setBooks={setBooks} theme={theme} />}
+        {(props) => <DetailsScreen {...props} books={books} setBooks={setBooks} />}
       </Stack.Screen>
     </Stack.Navigator>
   );
@@ -132,10 +133,10 @@ export default function App() {
                   })}
                 >
                   <Tab.Screen name="Home">
-                    {(props) => <HomeStack {...props} books={books} setBooks={setBooks} theme={theme} />}
+                    {(props) => <HomeStack {...props} books={books} setBooks={setBooks} />}
                   </Tab.Screen>
                   <Tab.Screen name="Favorites" options={{ headerShown: true }}>
-                    {(props) => <FavoritesScreen {...props} books={books} setBooks={setBooks} theme={theme} />}
+                    {(props) => <FavoritesScreen {...props} books={books} setBooks={setBooks} />}
                   </Tab.Screen>
                 </Tab.Navigator>
               )}
@@ -149,7 +150,7 @@ export default function App() {
                 headerStyle: { backgroundColor: palette.card },
                 headerTintColor: palette.text,
               }}>
-              {(props) => <SettingsScreen {...props} theme={theme} setTheme={setTheme} />}
+              {(props) => <SettingsScreen {...props} />}
             </Drawer.Screen>
             <Drawer.Screen
               name="About"
