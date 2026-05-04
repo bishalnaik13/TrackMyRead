@@ -56,16 +56,15 @@ export function BooksProvider({ children }) {
         clearTimeout(trashTimer);
       }
 
+      setBooks(prev => prev.filter(book => book.id !== id));
+
       const timer = setTimeout(() => {
-        setBooks(prev => prev.filter(book => book.id !== id));
         setTrash(null);
         setTrashTimer(null);
       }, 5000);
 
       setTrashTimer(timer);
     }
-
-    setBooks(prev => prev.filter(book => book.id !== id));
     return bookToDelete;
   }, [books, trashTimer]);
 

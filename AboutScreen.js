@@ -79,6 +79,8 @@ export default function AboutScreen() {
           <TouchableOpacity
             onPress={openMail}
             style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10 }}
+            accessibilityLabel="Send email to developer"
+            accessibilityRole="link"
           >
             <Ionicons name="mail-outline" size={20} color={colors.accent} style={{ marginRight: 12 }} />
             <Text style={{ color: colors.text }}>Send an Email</Text>
@@ -87,6 +89,8 @@ export default function AboutScreen() {
           <TouchableOpacity
             onPress={openGitHub}
             style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10 }}
+            accessibilityLabel="View source code on GitHub"
+            accessibilityRole="link"
           >
             <Ionicons name="logo-github" size={20} color={colors.accent} style={{ marginRight: 12 }} />
             <Text style={{ color: colors.text }}>View the code on GitHub</Text>
@@ -100,6 +104,8 @@ export default function AboutScreen() {
           <TouchableOpacity
             onPress={() => setPrivacyOpen(true)}
             style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10 }}
+            accessibilityLabel="View privacy policy"
+            accessibilityRole="button"
           >
             <Ionicons name="document-text-outline" size={20} color={colors.accent} style={{ marginRight: 12 }} />
             <Text style={{ color: colors.text }}>Privacy Policy</Text>
@@ -130,6 +136,8 @@ export default function AboutScreen() {
                 borderRadius: 8,
                 alignItems: 'center',
               }}
+              accessibilityLabel="Close privacy policy"
+              accessibilityRole="button"
             >
               <Text style={{ color: colors.buttonText }}>Close</Text>
             </TouchableOpacity>

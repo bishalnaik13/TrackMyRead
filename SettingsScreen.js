@@ -18,18 +18,21 @@ export default function SettingsScreen() {
       style={[
         styles.screen,
         { paddingHorizontal: 16, paddingTop: 8 }]}>
-      {/* <Text style={{ color: colors.text, fontSize: 18, marginBottom: 12 }}>Settings</Text> */}
       <View style={{
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         marginTop: 10,
       }}>
-        <Text style={{ color: colors.text }}>Dark Mode</Text>
-        <Switch value={theme === 'dark'} onValueChange={(v) => setTheme(v ? 'dark' : 'light')} />
+        <Text style={{ color: colors.text }} accessibilityRole="text">Dark Mode</Text>
+        <Switch
+          value={theme === 'dark'}
+          onValueChange={(v) => setTheme(v ? 'dark' : 'light')}
+          accessibilityLabel="Toggle dark mode"
+          accessibilityRole="switch"
+          accessibilityState={{ checked: theme === 'dark' }}
+        />
       </View>
-
-      {/* add more settings rows here later */}
     </SafeAreaView>
   );
 }

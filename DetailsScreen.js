@@ -32,6 +32,8 @@ export default function DetailsScreen({ route, navigation }) {
           <TouchableOpacity
             style={[styles.buttonPrimary, { marginTop: 20 }]}
             onPress={() => navigation.goBack()}
+            accessibilityLabel="Go back to book list"
+            accessibilityRole="button"
           >
             <Text style={styles.buttonText}>Go Back</Text>
           </TouchableOpacity>
@@ -39,6 +41,8 @@ export default function DetailsScreen({ route, navigation }) {
             <TouchableOpacity
               style={[styles.buttonNeutral, { marginTop: 12 }]}
               onPress={undoDelete}
+              accessibilityLabel="Undo delete and restore book"
+              accessibilityRole="button"
             >
               <Text style={[styles.buttonText, { color: colors.text }]}>Undo Delete</Text>
             </TouchableOpacity>
@@ -76,7 +80,11 @@ export default function DetailsScreen({ route, navigation }) {
       <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text }}>{book.title}</Text>
-          <TouchableOpacity onPress={handleToggleFavorite}>
+          <TouchableOpacity
+            onPress={handleToggleFavorite}
+            accessibilityLabel={book.favorite ? `Remove ${book.title} from favorites` : `Add ${book.title} to favorites`}
+            accessibilityRole="button"
+          >
             <Ionicons name={book.favorite ? 'heart' : 'heart-outline'} size={24} color={book.favorite ? colors.accent : colors.tint} />
           </TouchableOpacity>
         </View>
@@ -90,12 +98,14 @@ export default function DetailsScreen({ route, navigation }) {
               onChangeText={setTitle}
               placeholderTextColor={colors.tint}
               style={[styles.input, { marginTop: 12 }]}
+              accessibilityLabel="Edit book title"
             />
             <TextInput
               value={author}
               onChangeText={setAuthor}
               placeholderTextColor={colors.tint}
               style={[styles.input, { marginTop: 12 }]}
+              accessibilityLabel="Edit author name"
             />
             <TextInput
               value={notes}
@@ -103,9 +113,15 @@ export default function DetailsScreen({ route, navigation }) {
               placeholder="Notes"
               placeholderTextColor={colors.tint}
               style={[styles.input, { marginTop: 12 }]}
+              accessibilityLabel="Edit notes"
             />
             <View style={{ flexDirection: 'row', marginTop: 12 }}>
-              <TouchableOpacity style={styles.buttonPrimary} onPress={handleSaveEdit}>
+              <TouchableOpacity
+                style={styles.buttonPrimary}
+                onPress={handleSaveEdit}
+                accessibilityLabel="Save book changes"
+                accessibilityRole="button"
+              >
                 <Text style={styles.buttonText}>Save</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -115,7 +131,10 @@ export default function DetailsScreen({ route, navigation }) {
                   setTitle(book.title);
                   setAuthor(book.author);
                   setNotes(book.notes);
-                }}>
+                }}
+                accessibilityLabel="Cancel editing"
+                accessibilityRole="button"
+              >
                 <Text style={[styles.buttonText, { color: colors.text }]}>Cancel</Text>
               </TouchableOpacity>
             </View>
@@ -124,10 +143,20 @@ export default function DetailsScreen({ route, navigation }) {
           <>
             <Text style={{ marginTop: 12, color: colors.text }}>{book.notes}</Text>
             <View style={{ flexDirection: 'row', marginTop: 20 }}>
-              <TouchableOpacity style={styles.buttonPrimary} onPress={() => setEditing(true)}>
+              <TouchableOpacity
+                style={styles.buttonPrimary}
+                onPress={() => setEditing(true)}
+                accessibilityLabel="Edit book details"
+                accessibilityRole="button"
+              >
                 <Text style={styles.buttonText}>Edit</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.buttonDestructive} onPress={handleRemoveBook}>
+              <TouchableOpacity
+                style={styles.buttonDestructive}
+                onPress={handleRemoveBook}
+                accessibilityLabel={`Delete ${book.title}`}
+                accessibilityRole="button"
+              >
                 <Text style={styles.buttonText}>Delete</Text>
               </TouchableOpacity>
             </View>
@@ -139,17 +168,26 @@ export default function DetailsScreen({ route, navigation }) {
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <TouchableOpacity
                   style={[styles.button, { backgroundColor: book.status === BOOK_STATUS.TO_READ ? colors.primary : colors.card, flex: 1 }]}
-                  onPress={() => handleStatusChange(BOOK_STATUS.TO_READ)}>
+                  onPress={() => handleStatusChange(BOOK_STATUS.TO_READ)}
+                  accessibilityLabel="Mark as To Read"
+                  accessibilityRole="button"
+                >
                   <Text style={[styles.buttonText, { color: book.status === BOOK_STATUS.TO_READ ? colors.buttonText : colors.text }]}>To Read</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.button, { backgroundColor: book.status === BOOK_STATUS.READING ? colors.primary : colors.card, flex: 1 }]}
-                  onPress={() => handleStatusChange(BOOK_STATUS.READING)}>
+                  onPress={() => handleStatusChange(BOOK_STATUS.READING)}
+                  accessibilityLabel="Mark as Reading"
+                  accessibilityRole="button"
+                >
                   <Text style={[styles.buttonText, { color: book.status === BOOK_STATUS.READING ? colors.buttonText : colors.text }]}>Reading</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.button, { backgroundColor: book.status === BOOK_STATUS.READ ? colors.primary : colors.card, flex: 1 }]}
-                  onPress={() => handleStatusChange(BOOK_STATUS.READ)}>
+                  onPress={() => handleStatusChange(BOOK_STATUS.READ)}
+                  accessibilityLabel="Mark as Read"
+                  accessibilityRole="button"
+                >
                   <Text style={[styles.buttonText, { color: book.status === BOOK_STATUS.READ ? colors.buttonText : colors.text }]}>Read</Text>
                 </TouchableOpacity>
               </View>

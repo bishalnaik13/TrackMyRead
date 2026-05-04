@@ -16,7 +16,12 @@ export default function FavoritesScreen({ navigation }) {
 
   function renderItem({ item }) {
     return (
-      <TouchableOpacity onPress={() => navigation.navigate('Home', { screen: 'Details', params: { bookId: item.id } })} style={styles.card}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Home', { screen: 'Details', params: { bookId: item.id } })}
+        style={styles.card}
+        accessibilityLabel={`Favorite book: ${item.title} by ${item.author || 'unknown author'}`}
+        accessibilityRole="button"
+      >
         <View style={styles.cardLeft}>
           <View style={styles.coverPlaceholder}>
             <Ionicons name="book" size={28} color="#fff" />
@@ -26,7 +31,12 @@ export default function FavoritesScreen({ navigation }) {
           <Text style={styles.cardTitle}>{item.title}</Text>
           <Text style={styles.cardMeta}>{item.author || 'Unknown author'}</Text>
         </View>
-        <TouchableOpacity onPress={() => toggleFavorite(item.id)} style={{ padding: 8 }}>
+        <TouchableOpacity
+          onPress={() => toggleFavorite(item.id)}
+          style={{ padding: 8 }}
+          accessibilityLabel={`Remove ${item.title} from favorites`}
+          accessibilityRole="button"
+        >
           <Ionicons name="heart" size={22} color={item.favorite ? colors.accent : colors.tint} />
         </TouchableOpacity>
       </TouchableOpacity>

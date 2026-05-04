@@ -1,7 +1,8 @@
 import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { View } from 'react-native';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -14,9 +15,10 @@ import DetailsScreen from './DetailsScreen';
 import FavoritesScreen from './FavoritesScreen';
 import SettingsScreen from './SettingsScreen';
 import AboutScreen from './AboutScreen';
+import Snackbar from './components/Snackbar';
 
 import { ThemeContext } from './ThemeContext';
-import { BooksProvider } from './BooksContext';
+import { BooksProvider, useBooks } from './BooksContext';
 import { lightColors, darkColors } from './styles';
 import { loadTheme, saveTheme } from './utils/storage';
 
@@ -34,7 +36,12 @@ function HomeStack({ navigation: parentNav }) {
         headerTintColor: colors.text,
         headerTitleAlign: 'center',
         headerLeft: ({ tintColor }) => (
-          <TouchableOpacity onPress={() => parentNav?.getParent()?.openDrawer()} style={{ paddingLeft: 12 }}>
+          <TouchableOpacity
+            onPress={() => parentNav?.getParent()?.openDrawer()}
+            style={{ paddingLeft: 12 }}
+            accessibilityLabel="Open navigation menu"
+            accessibilityRole="button"
+          >
             <Ionicons name="menu" size={24} color={colors.text} />
           </TouchableOpacity>
         )
@@ -57,6 +64,7 @@ function getIconName(routeName, focused) {
 
 function MainApp() {
   const { theme, setTheme } = useContext(ThemeContext);
+  const { trash, undoDelete } = useBooks();
 
   useEffect(() => {
     (async () => {
@@ -84,65 +92,75 @@ function MainApp() {
   };
 
   return (
-    <NavigationContainer theme={navTheme}>
-      <Drawer.Navigator
-        initialRouteName="Main"
-        screenOptions={{
-          headerShown: false,
-          drawerPosition: 'left',
-          drawerStyle: { width: '70%' },
-          overlayColor: 'rgba(0,0,0,0.35)',
-        }}
-      >
-        <Drawer.Screen name="Main">
-          {() => (
-            <Tab.Navigator
-              screenOptions={({ route }) => ({
-                headerShown: false,
-                headerTitleAlign: 'center',
-                tabBarActiveTintColor: navTheme.colors.primary,
-                tabBarInactiveTintColor: navTheme.colors.text,
-                tabBarStyle: { backgroundColor: navTheme.colors.card },
-                tabBarIcon: ({ focused, color, size }) => (
-                  <Ionicons name={getIconName(route.name, focused)} size={size} color={color} />
-                ),
-              })}
-            >
-              <Tab.Screen name="Home">
-                {(props) => <HomeStack {...props} />}
-              </Tab.Screen>
-              <Tab.Screen name="Favorites" options={{ headerShown: true }}>
-                {(props) => <FavoritesScreen {...props} />}
-              </Tab.Screen>
-            </Tab.Navigator>
-          )}
-        </Drawer.Screen>
-        <Drawer.Screen
-          name="Settings"
-          options={{
-            headerShown: true,
-            headerTitleAlign: 'center',
-            title: 'Settings',
-            headerStyle: { backgroundColor: palette.card },
-            headerTintColor: palette.text,
-          }}>
-          {(props) => <SettingsScreen {...props} />}
-        </Drawer.Screen>
-        <Drawer.Screen
-          name="About"
-          options={{
-            headerShown: true,
-            headerTitleAlign: 'center',
-            title: 'About',
-            headerStyle: { backgroundColor: palette.card },
-            headerTintColor: palette.text,
-          }}>
-          {(props) => <AboutScreen {...props} />}
-        </Drawer.Screen>
-      </Drawer.Navigator>
+    <View style={{ flex: 1 }}>
+      <NavigationContainer theme={navTheme}>
+        <Drawer.Navigator
+          initialRouteName="Main"
+          screenOptions={{
+            headerShown: false,
+            drawerPosition: 'left',
+            drawerStyle: { width: '70%' },
+            overlayColor: 'rgba(0,0,0,0.35)',
+          }}
+        >
+          <Drawer.Screen name="Main">
+            {() => (
+              <Tab.Navigator
+                screenOptions={({ route }) => ({
+                  headerShown: false,
+                  headerTitleAlign: 'center',
+                  tabBarActiveTintColor: navTheme.colors.primary,
+                  tabBarInactiveTintColor: navTheme.colors.text,
+                  tabBarStyle: { backgroundColor: navTheme.colors.card },
+                  tabBarIcon: ({ focused, color, size }) => (
+                    <Ionicons name={getIconName(route.name, focused)} size={size} color={color} />
+                  ),
+                })}
+              >
+                <Tab.Screen name="Home">
+                  {(props) => <HomeStack {...props} />}
+                </Tab.Screen>
+                <Tab.Screen name="Favorites" options={{ headerShown: true }}>
+                  {(props) => <FavoritesScreen {...props} />}
+                </Tab.Screen>
+              </Tab.Navigator>
+            )}
+          </Drawer.Screen>
+          <Drawer.Screen
+            name="Settings"
+            options={{
+              headerShown: true,
+              headerTitleAlign: 'center',
+              title: 'Settings',
+              headerStyle: { backgroundColor: palette.card },
+              headerTintColor: palette.text,
+            }}>
+            {(props) => <SettingsScreen {...props} />}
+          </Drawer.Screen>
+          <Drawer.Screen
+            name="About"
+            options={{
+              headerShown: true,
+              headerTitleAlign: 'center',
+              title: 'About',
+              headerStyle: { backgroundColor: palette.card },
+              headerTintColor: palette.text,
+            }}>
+            {(props) => <AboutScreen {...props} />}
+          </Drawer.Screen>
+        </Drawer.Navigator>
+      </NavigationContainer>
+
+      <Snackbar
+        visible={!!trash}
+        message={`"${trash?.title}" deleted`}
+        actionLabel="UNDO"
+        onAction={undoDelete}
+        duration={5000}
+      />
 
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-    </NavigationContainer>
+    </View>
   );
 }
 
