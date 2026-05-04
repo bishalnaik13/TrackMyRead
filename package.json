@@ -6,7 +6,10 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
@@ -20,6 +23,7 @@
     "expo-sharing": "^55.0.18",
     "expo-status-bar": "~3.0.8",
     "expo-system-ui": "^6.0.8",
+    "prop-types": "^15.8.1",
     "react": "19.1.0",
     "react-native": "^0.81.5",
     "react-native-gesture-handler": "~2.28.0",
@@ -31,6 +35,9 @@
   },
   "private": true,
   "devDependencies": {
-    "babel-preset-expo": "^54.0.7"
+    "@testing-library/react-native": "^13.3.3",
+    "babel-preset-expo": "^54.0.7",
+    "jest": "^30.3.0",
+    "react-test-renderer": "^19.2.5"
   }
 }

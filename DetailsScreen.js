@@ -2,12 +2,14 @@ import React, { useState, useContext } from 'react';
 import { View, Text, TouchableOpacity, TextInput, Alert, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import PropTypes from 'prop-types';
 import { getStyles, getColors } from './styles';
 import { ThemeContext } from './ThemeContext';
 import { useBooks } from './BooksContext';
 import { BOOK_STATUS } from './constants';
+import { navigationShape, routeShape } from './types';
 
-export default function DetailsScreen({ route, navigation }) {
+function DetailsScreen({ route, navigation }) {
   const { bookId } = route.params || {};
   const { getBookById, updateBook, removeBook, toggleFavorite, setStatus, undoDelete, trash, fetchBookCover, updateBookCover } = useBooks();
   const book = getBookById(bookId);
@@ -248,3 +250,10 @@ export default function DetailsScreen({ route, navigation }) {
     </SafeAreaView>
   );
 }
+
+DetailsScreen.propTypes = {
+  route: routeShape,
+  navigation: navigationShape,
+};
+
+export default DetailsScreen;

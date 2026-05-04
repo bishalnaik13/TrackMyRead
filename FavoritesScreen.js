@@ -2,11 +2,13 @@ import React, { useContext } from 'react';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import PropTypes from 'prop-types';
 import { getStyles, getColors } from './styles';
 import { ThemeContext } from './ThemeContext';
 import { useBooks } from './BooksContext';
+import { navigationShape } from './types';
 
-export default function FavoritesScreen({ navigation }) {
+function FavoritesScreen({ navigation }) {
   const { theme } = useContext(ThemeContext);
   const { getFavorites, toggleFavorite } = useBooks();
 
@@ -64,3 +66,9 @@ export default function FavoritesScreen({ navigation }) {
     </SafeAreaView>
   );
 }
+
+FavoritesScreen.propTypes = {
+  navigation: navigationShape,
+};
+
+export default FavoritesScreen;

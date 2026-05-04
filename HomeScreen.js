@@ -2,12 +2,14 @@ import React, { useState, useContext, useRef, useEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity, Modal, TextInput, FlatList, KeyboardAvoidingView, Platform, ScrollView, Image, ActivityIndicator, Alert, Animated, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import PropTypes from 'prop-types';
 import { getStyles, getColors } from './styles';
 import { ThemeContext } from './ThemeContext';
 import { useBooks } from './BooksContext';
 import { UI_CONFIG, SORT_OPTIONS, FILTER_OPTIONS } from './constants';
+import { navigationShape } from './types';
 
-export default function HomeScreen({ navigation }) {
+function HomeScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
@@ -367,3 +369,9 @@ export default function HomeScreen({ navigation }) {
     </SafeAreaView>
   );
 }
+
+HomeScreen.propTypes = {
+  navigation: navigationShape,
+};
+
+export default HomeScreen;
