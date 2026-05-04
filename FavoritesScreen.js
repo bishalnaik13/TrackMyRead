@@ -1,22 +1,19 @@
-// ...existing code...
 import React, { useContext } from 'react';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { getStyles, getColors } from './styles';
 import { ThemeContext } from './ThemeContext';
+import { useBooks } from './BooksContext';
 
-export default function FavoritesScreen({ books = [], setBooks, navigation }) {
-
+export default function FavoritesScreen({ navigation }) {
   const { theme } = useContext(ThemeContext);
+  const { getFavorites, toggleFavorite } = useBooks();
 
   const styles = getStyles(theme);
   const colors = getColors(theme);
-  const favs = books.filter(b => b.favorite);
+  const favs = getFavorites();
 
-  function toggleFavorite(id) {
-    setBooks(prev => prev.map(b => b.id === id ? { ...b, favorite: !b.favorite } : b));
-  }
   function renderItem({ item }) {
     return (
       <TouchableOpacity onPress={() => navigation.navigate('Home', { screen: 'Details', params: { bookId: item.id } })} style={styles.card}>
@@ -36,7 +33,6 @@ export default function FavoritesScreen({ books = [], setBooks, navigation }) {
     );
   }
 
-
   return (
     <SafeAreaView
       edges={["left", "right"]}
@@ -53,7 +49,6 @@ export default function FavoritesScreen({ books = [], setBooks, navigation }) {
           keyExtractor={i => i.id}
           contentContainerStyle={{ padding: 12 }}
           renderItem = { renderItem }
-            
         />
       )}
     </SafeAreaView>

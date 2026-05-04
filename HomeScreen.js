@@ -1,40 +1,30 @@
-// ...existing code...
 import React, { useState, useContext } from 'react';
 import { View, Text, TouchableOpacity, Modal, TextInput, FlatList, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { getStyles, getColors } from './styles';
 import { ThemeContext } from './ThemeContext';
+import { useBooks } from './BooksContext';
 
-export default function HomeScreen({ navigation, books = [], setBooks}) {
+export default function HomeScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [query, setQuery] = useState('');
 
   const { theme } = useContext(ThemeContext);
+  const { books, addBook, toggleFavorite, searchBooks } = useBooks();
 
   const styles = getStyles(theme);
   const colors = getColors(theme);
 
   function resetForm() { setTitle(''); setAuthor(''); }
 
-  const filteredBooks = books.filter(b => {
-    if (!query.trim()) return true;
-    const q = query.toLowerCase();
-    return (b.title || '').toLowerCase().includes(q) || (b.author || '').toLowerCase().includes(q);
-  });
+  const filteredBooks = searchBooks(query);
 
-  function addBook() {
+  function handleAddBook() {
     if (!title.trim()) return;
-    const newBook = { 
-      id: Date.now().toString(), 
-      title: title.trim(), 
-      author: author.trim(), 
-      favorite: false, 
-      status: 'To Read'
-    };
-    setBooks(prev => [newBook, ...prev]);
+    addBook(title.trim(), author.trim());
     resetForm();
     setModalVisible(false);
   }
@@ -51,7 +41,7 @@ export default function HomeScreen({ navigation, books = [], setBooks}) {
           <Text style={styles.cardTitle}>{item.title}</Text>
           <Text style={styles.cardMeta}>{item.author || 'Unknown author'}</Text>
         </View>
-        <TouchableOpacity onPress={() => setBooks(prev => prev.map(b => b.id === item.id ? { ...b, favorite: !b.favorite } : b))} style={{ padding: 8 }}>
+        <TouchableOpacity onPress={() => toggleFavorite(item.id)} style={{ padding: 8 }}>
           <Ionicons name={item.favorite ? 'heart' : 'heart-outline'} size={22} color={item.favorite ? colors.accent : colors.tint} />
         </TouchableOpacity>
       </TouchableOpacity>
@@ -60,7 +50,6 @@ export default function HomeScreen({ navigation, books = [], setBooks}) {
 
   return (
     <SafeAreaView edges={["left", "right"]} style={styles.screen}>
-      {/* Search box */}
       <View style={[styles.searchWrapper, { margin: 12 }]}>
         <TextInput
           placeholder="Search by title or author"
@@ -77,7 +66,6 @@ export default function HomeScreen({ navigation, books = [], setBooks}) {
           <Text style={styles.emptySubtitle}>Tap + to add</Text>
         </View>
       ) : (
-        // Single list driven by filteredBooks
         <>
           {filteredBooks.length === 0 ? (
             <View style={[styles.empty, { paddingTop: 20 }]}>
@@ -107,7 +95,7 @@ export default function HomeScreen({ navigation, books = [], setBooks}) {
               <TextInput style={styles.input} placeholder="Title *" placeholderTextColor={colors.tint} value={title} onChangeText={setTitle} />
               <TextInput style={styles.input} placeholder="Author" placeholderTextColor={colors.tint} value={author} onChangeText={setAuthor} />
               <View style={styles.row}>
-                <TouchableOpacity style={styles.buttonPrimary} onPress={addBook}>
+                <TouchableOpacity style={styles.buttonPrimary} onPress={handleAddBook}>
                   <Text style={styles.buttonText}>Save</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonNeutral} onPress={() => { setModalVisible(false); resetForm(); }}>

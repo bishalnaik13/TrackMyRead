@@ -1,12 +1,11 @@
 import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { TouchableOpacity } from 'react-native';
 
@@ -17,14 +16,15 @@ import SettingsScreen from './SettingsScreen';
 import AboutScreen from './AboutScreen';
 
 import { ThemeContext } from './ThemeContext';
+import { BooksProvider } from './BooksContext';
 import { lightColors, darkColors } from './styles';
-
+import { loadTheme, saveTheme } from './utils/storage';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
-function HomeStack({ navigation: parentNav, books, setBooks }) {
+function HomeStack({ navigation: parentNav }) {
   const { theme } = useContext(ThemeContext);
   const colors = theme === 'dark' ? darkColors : lightColors;
   return (
@@ -40,10 +40,10 @@ function HomeStack({ navigation: parentNav, books, setBooks }) {
         )
       }}>
       <Stack.Screen name="HomeList" options={{ title: "My Books" }}>
-        {(props) => <HomeScreen {...props} books={books} setBooks={setBooks} />}
+        {(props) => <HomeScreen {...props} />}
       </Stack.Screen>
       <Stack.Screen name="Details" options={{ title: "Details" }}>
-        {(props) => <DetailsScreen {...props} books={books} setBooks={setBooks} />}
+        {(props) => <DetailsScreen {...props} />}
       </Stack.Screen>
     </Stack.Navigator>
   );
@@ -55,41 +55,20 @@ function getIconName(routeName, focused) {
   return 'ellipse';
 }
 
-// const Navigation = createStaticNavigation(Stack);
+function MainApp() {
+  const { theme, setTheme } = useContext(ThemeContext);
 
-export default function App() {
-  const [books, setBooks] = React.useState([]);
-  React.useEffect(() => {
+  useEffect(() => {
     (async () => {
-      const raw = await AsyncStorage.getItem('@books').catch(() => null);
-      if (raw) setBooks(JSON.parse(raw));
-    })();
-  }, [])
-
-  React.useEffect(() => {
-    (async () => {
-      await AsyncStorage.setItem('@books', JSON.stringify(books)).catch(() => null);
-    })();
-  }, [books]);
-
-  //Theme persistence
-  const [theme, setTheme] = React.useState('light');
-  React.useEffect(() => {
-    (async () => {
-      const savedTheme = await AsyncStorage.getItem('@theme').catch(() => null);
-      if (savedTheme) {
-        setTheme(savedTheme);
-      }
+      const savedTheme = await loadTheme();
+      setTheme(savedTheme);
     })();
   }, []);
 
-  React.useEffect(() => {
-    (async () => {
-      await AsyncStorage.setItem('@theme', theme).catch(() => null);
-    })();
+  useEffect(() => {
+    saveTheme(theme);
   }, [theme]);
 
-  // derive palette and navigation theme once
   const palette = theme === 'dark' ? darkColors : lightColors;
   const navTheme = {
     ...((theme === 'dark') ? DarkTheme : DefaultTheme),
@@ -105,71 +84,78 @@ export default function App() {
   };
 
   return (
+    <NavigationContainer theme={navTheme}>
+      <Drawer.Navigator
+        initialRouteName="Main"
+        screenOptions={{
+          headerShown: false,
+          drawerPosition: 'left',
+          drawerStyle: { width: '70%' },
+          overlayColor: 'rgba(0,0,0,0.35)',
+        }}
+      >
+        <Drawer.Screen name="Main">
+          {() => (
+            <Tab.Navigator
+              screenOptions={({ route }) => ({
+                headerShown: false,
+                headerTitleAlign: 'center',
+                tabBarActiveTintColor: navTheme.colors.primary,
+                tabBarInactiveTintColor: navTheme.colors.text,
+                tabBarStyle: { backgroundColor: navTheme.colors.card },
+                tabBarIcon: ({ focused, color, size }) => (
+                  <Ionicons name={getIconName(route.name, focused)} size={size} color={color} />
+                ),
+              })}
+            >
+              <Tab.Screen name="Home">
+                {(props) => <HomeStack {...props} />}
+              </Tab.Screen>
+              <Tab.Screen name="Favorites" options={{ headerShown: true }}>
+                {(props) => <FavoritesScreen {...props} />}
+              </Tab.Screen>
+            </Tab.Navigator>
+          )}
+        </Drawer.Screen>
+        <Drawer.Screen
+          name="Settings"
+          options={{
+            headerShown: true,
+            headerTitleAlign: 'center',
+            title: 'Settings',
+            headerStyle: { backgroundColor: palette.card },
+            headerTintColor: palette.text,
+          }}>
+          {(props) => <SettingsScreen {...props} />}
+        </Drawer.Screen>
+        <Drawer.Screen
+          name="About"
+          options={{
+            headerShown: true,
+            headerTitleAlign: 'center',
+            title: 'About',
+            headerStyle: { backgroundColor: palette.card },
+            headerTintColor: palette.text,
+          }}>
+          {(props) => <AboutScreen {...props} />}
+        </Drawer.Screen>
+      </Drawer.Navigator>
+
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+    </NavigationContainer>
+  );
+}
+
+export default function App() {
+  const [theme, setTheme] = useState('light');
+
+  return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeContext.Provider value={{ theme, setTheme }}>
-
-        <NavigationContainer theme={navTheme}>
-          <Drawer.Navigator
-            initialRouteName="Main"
-            screenOptions={{
-              headerShown: false,
-              drawerPosition: 'left',
-              drawerStyle: { width: '70%' },
-              overlayColor: 'rgba(0,0,0,0.35)',
-            }}
-          >
-            <Drawer.Screen name="Main">
-              {() => (
-                <Tab.Navigator
-                  screenOptions={({ route }) => ({
-                    headerShown: false,
-                    headerTitleAlign: 'center',
-                    tabBarActiveTintColor: navTheme.colors.primary,
-                    tabBarInactiveTintColor: navTheme.colors.text,
-                    tabBarStyle: { backgroundColor: navTheme.colors.card },
-                    tabBarIcon: ({ focused, color, size }) => (
-                      <Ionicons name={getIconName(route.name, focused)} size={size} color={color} />
-                    ),
-                  })}
-                >
-                  <Tab.Screen name="Home">
-                    {(props) => <HomeStack {...props} books={books} setBooks={setBooks} />}
-                  </Tab.Screen>
-                  <Tab.Screen name="Favorites" options={{ headerShown: true }}>
-                    {(props) => <FavoritesScreen {...props} books={books} setBooks={setBooks} />}
-                  </Tab.Screen>
-                </Tab.Navigator>
-              )}
-            </Drawer.Screen>
-            <Drawer.Screen
-              name="Settings"
-              options={{
-                headerShown: true,                // override: show header for this screen
-                headerTitleAlign: 'center',
-                title: 'Settings',
-                headerStyle: { backgroundColor: palette.card },
-                headerTintColor: palette.text,
-              }}>
-              {(props) => <SettingsScreen {...props} />}
-            </Drawer.Screen>
-            <Drawer.Screen
-              name="About"
-              options={{
-                headerShown: true,
-                headerTitleAlign: 'center',
-                title: 'About',
-                headerStyle: { backgroundColor: palette.card },
-                headerTintColor: palette.text,
-              }}>
-              {(props) => <AboutScreen {...props} />}
-            </Drawer.Screen>
-          </Drawer.Navigator>
-
-          <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-        </NavigationContainer>
-
+        <BooksProvider>
+          <MainApp />
+        </BooksProvider>
       </ThemeContext.Provider>
     </GestureHandlerRootView>
   );
 }
-
