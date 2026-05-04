@@ -4,7 +4,7 @@ const BOOKS_KEY = '@books';
 const THEME_KEY = '@theme';
 const SCHEMA_VERSION_KEY = '@schema_version';
 
-const CURRENT_SCHEMA_VERSION = 1;
+const CURRENT_SCHEMA_VERSION = 2;
 
 function isValidBook(book) {
   return (
@@ -98,7 +98,7 @@ export async function runMigrations(books) {
 
   if (version < 1) {
     console.log('Running migration v1: ensuring all books have required fields');
-    return books.map(book => ({
+    books = books.map(book => ({
       id: book.id,
       title: book.title || 'Untitled',
       author: book.author || '',
@@ -106,6 +106,14 @@ export async function runMigrations(books) {
       status: book.status || 'To Read',
       notes: book.notes || '',
       createdAt: book.createdAt || Date.now(),
+    }));
+  }
+
+  if (version < 2) {
+    console.log('Running migration v2: adding coverUrl field');
+    books = books.map(book => ({
+      ...book,
+      coverUrl: book.coverUrl || '',
     }));
   }
 
@@ -128,4 +136,39 @@ export async function initializeStorage() {
     console.error('Error initializing storage:', error);
     return [];
   }
+}
+
+export async function exportBooks(books) {
+  const exportData = {
+    version: CURRENT_SCHEMA_VERSION,
+    exportedAt: new Date().toISOString(),
+    books: books,
+  };
+  return JSON.stringify(exportData, null, 2);
+}
+
+export function validateImportData(data) {
+  try {
+    const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+    if (!parsed.books || !Array.isArray(parsed.books)) {
+      return { valid: false, error: 'Invalid format: missing books array' };
+    }
+    for (const book of parsed.books) {
+      if (!book.id || !book.title) {
+        return { valid: false, error: 'Invalid format: each book must have id and title' };
+      }
+    }
+    return { valid: true, books: parsed.books };
+  } catch (error) {
+    return { valid: false, error: 'Invalid JSON format' };
+  }
+}
+
+export function mergeBooks(existingBooks, newBooks, mode = 'replace') {
+  if (mode === 'replace') {
+    return newBooks;
+  }
+  const existingIds = new Set(existingBooks.map(b => b.id));
+  const uniqueNewBooks = newBooks.filter(b => !existingIds.has(b.id));
+  return [...existingBooks, ...uniqueNewBooks];
 }

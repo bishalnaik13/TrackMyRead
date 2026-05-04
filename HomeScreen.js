@@ -1,11 +1,11 @@
-import React, { useState, useContext, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Modal, TextInput, FlatList, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import React, { useState, useContext, useRef, useEffect, useMemo } from 'react';
+import { View, Text, TouchableOpacity, Modal, TextInput, FlatList, KeyboardAvoidingView, Platform, ScrollView, Image, ActivityIndicator, Alert, Animated, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { getStyles, getColors } from './styles';
 import { ThemeContext } from './ThemeContext';
 import { useBooks } from './BooksContext';
-import { UI_CONFIG } from './constants';
+import { UI_CONFIG, SORT_OPTIONS, FILTER_OPTIONS } from './constants';
 
 export default function HomeScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -13,10 +13,15 @@ export default function HomeScreen({ navigation }) {
   const [author, setAuthor] = useState('');
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [coverUrl, setCoverUrl] = useState('');
+  const [fetchingCover, setFetchingCover] = useState(false);
+  const [sortBy, setSortBy] = useState(SORT_OPTIONS.DATE_NEWEST);
+  const [filterBy, setFilterBy] = useState(FILTER_OPTIONS.ALL);
+  const [showSortFilter, setShowSortFilter] = useState(false);
   const debounceTimeout = useRef(null);
 
   const { theme } = useContext(ThemeContext);
-  const { books, addBook, toggleFavorite, searchBooks } = useBooks();
+  const { books, addBook, toggleFavorite, searchBooks, fetchBookCover, sortBooks, filterBooks, removeBook } = useBooks();
 
   const styles = getStyles(theme);
   const colors = getColors(theme);
@@ -36,43 +41,144 @@ export default function HomeScreen({ navigation }) {
     };
   }, [query]);
 
-  function resetForm() { setTitle(''); setAuthor(''); }
+  function resetForm() { setTitle(''); setAuthor(''); setCoverUrl(''); }
 
-  const filteredBooks = searchBooks(debouncedQuery);
+  const filteredBooks = useMemo(() => {
+    let result = searchBooks(debouncedQuery);
+    result = filterBooks(result, filterBy);
+    result = sortBooks(result, sortBy);
+    return result;
+  }, [debouncedQuery, filterBy, sortBy, searchBooks, filterBooks, sortBooks]);
+
+  async function handleSearchCover() {
+    if (!title.trim()) {
+      Alert.alert('Required', 'Please enter a book title first');
+      return;
+    }
+    setFetchingCover(true);
+    try {
+      const cover = await fetchBookCover(title, author);
+      if (cover) {
+        setCoverUrl(cover);
+        Alert.alert('Success', 'Book cover found!');
+      } else {
+        Alert.alert('Not Found', 'Could not find a cover for this book');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to search for cover');
+    }
+    setFetchingCover(false);
+  }
 
   function handleAddBook() {
     if (!title.trim()) return;
-    addBook(title.trim(), author.trim());
+    addBook(title.trim(), author.trim(), coverUrl);
     resetForm();
     setModalVisible(false);
   }
 
+  function SwipeableRow({ item, children, onDelete, onToggleFavorite }) {
+    const translateX = useRef(new Animated.Value(0)).current;
+    const [isOpen, setIsOpen] = useState(false);
+
+    function handleSwipe(direction) {
+      if (direction === 'left') {
+        Animated.spring(translateX, {
+          toValue: -100,
+          useNativeDriver: true,
+        }).start();
+        setIsOpen(true);
+      } else if (direction === 'right') {
+        if (isOpen) {
+          Animated.spring(translateX, {
+            toValue: 0,
+            useNativeDriver: true,
+          }).start();
+          setIsOpen(false);
+        } else {
+          onToggleFavorite();
+        }
+      }
+    }
+
+    function handleActionPress(action) {
+      if (action === 'delete') {
+        Animated.spring(translateX, {
+          toValue: 0,
+          useNativeDriver: true,
+        }).start();
+        onDelete();
+      } else if (action === 'favorite') {
+        onToggleFavorite();
+      }
+      setIsOpen(false);
+    }
+
+    return (
+      <View style={{ marginBottom: 10 }}>
+        <View style={styles.swipeActions}>
+          <TouchableOpacity
+            style={[styles.swipeAction, { backgroundColor: colors.destructive }]}
+            onPress={() => handleActionPress('delete')}
+            accessibilityLabel={`Delete ${item.title}`}
+            accessibilityRole="button"
+          >
+            <Ionicons name="trash-outline" size={20} color="#fff" />
+            <Text style={{ color: '#fff', fontSize: 10, marginTop: 2 }}>Delete</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.swipeAction, { backgroundColor: colors.accent }]}
+            onPress={() => handleActionPress('favorite')}
+            accessibilityLabel={`Toggle favorite for ${item.title}`}
+            accessibilityRole="button"
+          >
+            <Ionicons name={item.favorite ? 'heart' : 'heart-outline'} size={20} color="#fff" />
+            <Text style={{ color: '#fff', fontSize: 10, marginTop: 2 }}>{item.favorite ? 'Unfavorite' : 'Favorite'}</Text>
+          </TouchableOpacity>
+        </View>
+        <Animated.View style={{ transform: [{ translateX }] }}>
+          {children}
+        </Animated.View>
+      </View>
+    );
+  }
+
   function renderItem({ item }) {
     return (
-      <TouchableOpacity
-        onPress={() => navigation.navigate('Details', { bookId: item.id })}
-        style={styles.card}
-        accessibilityLabel={`Book: ${item.title} by ${item.author || 'unknown author'}`}
-        accessibilityRole="button"
+      <SwipeableRow
+        item={item}
+        onDelete={() => removeBook(item.id)}
+        onToggleFavorite={() => toggleFavorite(item.id)}
       >
-        <View style={styles.cardLeft}>
-          <View style={styles.coverPlaceholder}>
-            <Ionicons name="book" size={28} color="#fff" />
-          </View>
-        </View>
-        <View style={styles.cardRight}>
-          <Text style={styles.cardTitle}>{item.title}</Text>
-          <Text style={styles.cardMeta}>{item.author || 'Unknown author'}</Text>
-        </View>
         <TouchableOpacity
-          onPress={() => toggleFavorite(item.id)}
-          style={{ padding: 8 }}
-          accessibilityLabel={item.favorite ? `Remove ${item.title} from favorites` : `Add ${item.title} to favorites`}
+          onPress={() => navigation.navigate('Details', { bookId: item.id })}
+          style={styles.card}
+          accessibilityLabel={`Book: ${item.title} by ${item.author || 'unknown author'}`}
           accessibilityRole="button"
         >
-          <Ionicons name={item.favorite ? 'heart' : 'heart-outline'} size={22} color={item.favorite ? colors.accent : colors.tint} />
+          <View style={styles.cardLeft}>
+            {item.coverUrl ? (
+              <Image source={{ uri: item.coverUrl }} style={styles.coverImage} resizeMode="cover" />
+            ) : (
+              <View style={styles.coverPlaceholder}>
+                <Ionicons name="book" size={28} color="#fff" />
+              </View>
+            )}
+          </View>
+          <View style={styles.cardRight}>
+            <Text style={styles.cardTitle}>{item.title}</Text>
+            <Text style={styles.cardMeta}>{item.author || 'Unknown author'}</Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => toggleFavorite(item.id)}
+            style={{ padding: 8 }}
+            accessibilityLabel={item.favorite ? `Remove ${item.title} from favorites` : `Add ${item.title} to favorites`}
+            accessibilityRole="button"
+          >
+            <Ionicons name={item.favorite ? 'heart' : 'heart-outline'} size={22} color={item.favorite ? colors.accent : colors.tint} />
+          </TouchableOpacity>
         </TouchableOpacity>
-      </TouchableOpacity>
+      </SwipeableRow>
     );
   }
 
@@ -89,6 +195,70 @@ export default function HomeScreen({ navigation }) {
           accessibilityHint="Enter book title or author name to search"
         />
       </View>
+
+      <View style={{ flexDirection: 'row', paddingHorizontal: 12, marginBottom: 8 }}>
+        <TouchableOpacity
+          onPress={() => setShowSortFilter(!showSortFilter)}
+          style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 6, paddingHorizontal: 10, backgroundColor: colors.card, borderRadius: 6 }}
+          accessibilityLabel="Sort and filter options"
+          accessibilityRole="button"
+        >
+          <Ionicons name="options" size={16} color={colors.text} />
+          <Text style={{ color: colors.text, marginLeft: 6, fontSize: 14 }}>Sort/Filter</Text>
+        </TouchableOpacity>
+        {(filterBy !== FILTER_OPTIONS.ALL || sortBy !== SORT_OPTIONS.DATE_NEWEST) && (
+          <TouchableOpacity
+            onPress={() => { setFilterBy(FILTER_OPTIONS.ALL); setSortBy(SORT_OPTIONS.DATE_NEWEST); }}
+            style={{ marginLeft: 8, paddingVertical: 6, paddingHorizontal: 10 }}
+          >
+            <Text style={{ color: colors.destructive, fontSize: 14 }}>Clear</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {showSortFilter && (
+        <View style={{ paddingHorizontal: 12, paddingBottom: 12 }}>
+          <View style={{ marginBottom: 8 }}>
+            <Text style={{ color: colors.tint, fontSize: 12, marginBottom: 4 }}>Sort by:</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {[
+                { value: SORT_OPTIONS.DATE_NEWEST, label: 'Newest' },
+                { value: SORT_OPTIONS.DATE_OLDEST, label: 'Oldest' },
+                { value: SORT_OPTIONS.TITLE_ASC, label: 'A-Z' },
+                { value: SORT_OPTIONS.TITLE_DESC, label: 'Z-A' },
+                { value: SORT_OPTIONS.STATUS, label: 'Status' },
+              ].map(opt => (
+                <TouchableOpacity
+                  key={opt.value}
+                  onPress={() => setSortBy(opt.value)}
+                  style={{ paddingVertical: 6, paddingHorizontal: 12, marginRight: 8, marginBottom: 4, borderRadius: 16, backgroundColor: sortBy === opt.value ? colors.primary : colors.card }}
+                >
+                  <Text style={{ color: sortBy === opt.value ? colors.buttonText : colors.text, fontSize: 12 }}>{opt.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+          <View>
+            <Text style={{ color: colors.tint, fontSize: 12, marginBottom: 4 }}>Filter by status:</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {[
+                { value: FILTER_OPTIONS.ALL, label: 'All' },
+                { value: FILTER_OPTIONS.TO_READ, label: 'To Read' },
+                { value: FILTER_OPTIONS.READING, label: 'Reading' },
+                { value: FILTER_OPTIONS.READ, label: 'Read' },
+              ].map(opt => (
+                <TouchableOpacity
+                  key={opt.value}
+                  onPress={() => setFilterBy(opt.value)}
+                  style={{ paddingVertical: 6, paddingHorizontal: 12, marginRight: 8, marginBottom: 4, borderRadius: 16, backgroundColor: filterBy === opt.value ? colors.primary : colors.card }}
+                >
+                  <Text style={{ color: filterBy === opt.value ? colors.buttonText : colors.text, fontSize: 12 }}>{opt.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+      )}
 
       {books.length === 0 ? (
         <View style={styles.empty}>
@@ -147,6 +317,31 @@ export default function HomeScreen({ navigation }) {
                 onChangeText={setAuthor}
                 accessibilityLabel="Author name input"
               />
+              {coverUrl ? (
+                <View style={{ alignItems: 'center', marginVertical: 10 }}>
+                  <Image source={{ uri: coverUrl }} style={{ width: 80, height: 120, borderRadius: 4 }} />
+                  <TouchableOpacity onPress={() => setCoverUrl('')} style={{ marginTop: 4 }}>
+                    <Text style={{ color: colors.destructive, fontSize: 12 }}>Remove cover</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, marginTop: 4 }}
+                  onPress={handleSearchCover}
+                  disabled={fetchingCover}
+                  accessibilityLabel="Search for book cover"
+                  accessibilityRole="button"
+                >
+                  {fetchingCover ? (
+                    <ActivityIndicator size="small" color={colors.primary} />
+                  ) : (
+                    <>
+                      <Ionicons name="image-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
+                      <Text style={{ color: colors.primary }}>Search cover from Google</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              )}
               <View style={styles.row}>
                 <TouchableOpacity
                   style={styles.buttonPrimary}

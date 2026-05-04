@@ -4,6 +4,21 @@ export const BOOK_STATUS = {
   READ: 'Read',
 };
 
+export const SORT_OPTIONS = {
+  TITLE_ASC: 'title_asc',
+  TITLE_DESC: 'title_desc',
+  DATE_NEWEST: 'date_newest',
+  DATE_OLDEST: 'date_oldest',
+  STATUS: 'status',
+};
+
+export const FILTER_OPTIONS = {
+  ALL: 'all',
+  TO_READ: 'To Read',
+  READING: 'Reading',
+  READ: 'Read',
+};
+
 export const NAVIGATION_NAMES = {
   HOME: 'Home',
   FAVORITES: 'Favorites',

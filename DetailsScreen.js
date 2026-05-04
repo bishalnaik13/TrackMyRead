@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Alert, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Alert, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { getStyles, getColors } from './styles';
@@ -9,13 +9,14 @@ import { BOOK_STATUS } from './constants';
 
 export default function DetailsScreen({ route, navigation }) {
   const { bookId } = route.params || {};
-  const { getBookById, updateBook, removeBook, toggleFavorite, setStatus, undoDelete, trash } = useBooks();
+  const { getBookById, updateBook, removeBook, toggleFavorite, setStatus, undoDelete, trash, fetchBookCover, updateBookCover } = useBooks();
   const book = getBookById(bookId);
 
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(book ? book.title : '');
   const [author, setAuthor] = useState(book ? book.author : '');
   const [notes, setNotes] = useState(book ? book.notes : '');
+  const [fetchingCover, setFetchingCover] = useState(false);
 
   const { theme } = useContext(ThemeContext);
 
@@ -75,9 +76,58 @@ export default function DetailsScreen({ route, navigation }) {
     setStatus(bookId, newStatus);
   }
 
+  async function handleSearchCover() {
+    setFetchingCover(true);
+    try {
+      const cover = await fetchBookCover(book.title, book.author);
+      if (cover) {
+        updateBookCover(bookId, cover);
+        Alert.alert('Success', 'Book cover found!');
+      } else {
+        Alert.alert('Not Found', 'Could not find a cover for this book');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to search for cover');
+    }
+    setFetchingCover(false);
+  }
+
+  function handleRemoveCover() {
+    updateBookCover(bookId, '');
+  }
+
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.screen, { padding: 12 }]}>
       <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
+        {book.coverUrl ? (
+          <View style={{ alignItems: 'center', marginBottom: 16 }}>
+            <Image source={{ uri: book.coverUrl }} style={{ width: 120, height: 180, borderRadius: 8 }} />
+            {!editing && (
+              <TouchableOpacity onPress={handleRemoveCover} style={{ marginTop: 8 }}>
+                <Text style={{ color: colors.destructive, fontSize: 12 }}>Remove cover</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        ) : (
+          !editing && (
+            <TouchableOpacity
+              onPress={handleSearchCover}
+              disabled={fetchingCover}
+              style={{ alignItems: 'center', paddingVertical: 12 }}
+              accessibilityLabel="Search for book cover"
+              accessibilityRole="button"
+            >
+              {fetchingCover ? (
+                <ActivityIndicator size="small" color={colors.primary} />
+              ) : (
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Ionicons name="image-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
+                  <Text style={{ color: colors.primary }}>Search cover</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          )
+        )}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text }}>{book.title}</Text>
           <TouchableOpacity

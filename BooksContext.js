@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import uuid from 'react-native-uuid';
 import { initializeStorage, saveBooks } from './utils/storage';
 import { BOOK_STATUS } from './constants';
 
@@ -25,11 +25,12 @@ export function BooksProvider({ children }) {
     }
   }, [books, loading]);
 
-  const addBook = useCallback((title, author = '') => {
+  const addBook = useCallback((title, author = '', coverUrl = '') => {
     const newBook = {
-      id: uuidv4(),
+      id: uuid.v4(),
       title: title.trim(),
       author: author.trim(),
+      coverUrl: coverUrl || '',
       favorite: false,
       status: BOOK_STATUS.TO_READ,
       notes: '',
@@ -37,6 +38,34 @@ export function BooksProvider({ children }) {
     };
     setBooks(prev => [newBook, ...prev]);
     return newBook;
+  }, []);
+
+  const fetchBookCover = useCallback(async (title, author) => {
+    try {
+      const query = encodeURIComponent(`${title} ${author}`.trim());
+      const response = await fetch(
+        `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1`
+      );
+      const data = await response.json();
+      if (data.items && data.items[0]?.volumeInfo?.imageLinks?.thumbnail) {
+        let coverUrl = data.items[0].volumeInfo.imageLinks.thumbnail;
+        if (coverUrl.startsWith('http://')) {
+          coverUrl = coverUrl.replace('http://', 'https://');
+        }
+        return coverUrl;
+      }
+    } catch (error) {
+      console.error('Error fetching book cover:', error);
+    }
+    return null;
+  }, []);
+
+  const updateBookCover = useCallback((id, coverUrl) => {
+    setBooks(prev =>
+      prev.map(book =>
+        book.id === id ? { ...book, coverUrl } : book
+      )
+    );
   }, []);
 
   const updateBook = useCallback((id, updates) => {
@@ -112,6 +141,29 @@ export function BooksProvider({ children }) {
     );
   }, [books]);
 
+  const sortBooks = useCallback((bookList, sortBy) => {
+    const sorted = [...bookList];
+    switch (sortBy) {
+      case 'title_asc':
+        return sorted.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+      case 'title_desc':
+        return sorted.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
+      case 'date_newest':
+        return sorted.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      case 'date_oldest':
+        return sorted.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+      case 'status':
+        return sorted.sort((a, b) => (a.status || '').localeCompare(b.status || ''));
+      default:
+        return sorted;
+    }
+  }, []);
+
+  const filterBooks = useCallback((bookList, filterBy) => {
+    if (!filterBy || filterBy === 'all') return bookList;
+    return bookList.filter(b => b.status === filterBy);
+  }, []);
+
   const value = {
     books,
     loading,
@@ -124,7 +176,11 @@ export function BooksProvider({ children }) {
     getBookById,
     getFavorites,
     searchBooks,
+    sortBooks,
+    filterBooks,
     trash,
+    fetchBookCover,
+    updateBookCover,
   };
 
   return (

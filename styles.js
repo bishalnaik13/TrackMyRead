@@ -111,11 +111,27 @@ function makeStyles(themeName = 'light') {
     },
     cardLeft: { marginRight: 12 },
     coverPlaceholder: { width: 56, height: 80, backgroundColor: colors.primary, borderRadius: 6, alignItems: 'center', justifyContent: 'center' },
+    coverImage: { width: 56, height: 80, borderRadius: 6 },
     cardRight: { flex: 1 },
     cardTitle: { fontSize: 16, fontWeight: '600', marginBottom: 4, color: colors.text },
     cardMeta: { color: colors.tint },
     cardMetaSmall: { color: colors.tint, marginTop: 4 },
     cardNotes: { color: colors.text, marginTop: 8 },
+    swipeActions: {
+      position: 'absolute',
+      right: 0,
+      top: 0,
+      bottom: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    swipeAction: {
+      width: 80,
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 10,
+    },
   });
 }
 
