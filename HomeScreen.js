@@ -9,6 +9,8 @@ import { ThemeContext } from './ThemeContext';
 import { useBooks } from './BooksContext';
 import { UI_CONFIG, SORT_OPTIONS, FILTER_OPTIONS } from './constants';
 import { navigationShape } from './types';
+import EmptyState from './components/EmptyState';
+import LoadingState from './components/LoadingState';
 
 function HomeScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -23,6 +25,7 @@ function HomeScreen({ navigation }) {
   const [sortBy, setSortBy] = useState(SORT_OPTIONS.DATE_NEWEST);
   const [filterBy, setFilterBy] = useState(FILTER_OPTIONS.ALL);
   const [showSortFilter, setShowSortFilter] = useState(false);
+  const [viewMode, setViewMode] = useState('list');
   const debounceTimeout = useRef(null);
 
   const { theme } = useContext(ThemeContext);
@@ -245,6 +248,14 @@ function HomeScreen({ navigation }) {
           <Ionicons name="options" size={16} color={colors.text} />
           <Text style={{ color: colors.text, marginLeft: 6, fontSize: 14 }}>Sort/Filter</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
+          style={{ marginLeft: 8, paddingVertical: 6, paddingHorizontal: 10, backgroundColor: colors.card, borderRadius: 6 }}
+          accessibilityLabel={`Switch to ${viewMode === 'list' ? 'grid' : 'list'} view`}
+          accessibilityRole="button"
+        >
+          <Ionicons name={viewMode === 'list' ? 'grid-outline' : 'list-outline'} size={16} color={colors.text} />
+        </TouchableOpacity>
         {(filterBy !== FILTER_OPTIONS.ALL || sortBy !== SORT_OPTIONS.DATE_NEWEST) && (
           <TouchableOpacity
             onPress={() => { setFilterBy(FILTER_OPTIONS.ALL); setSortBy(SORT_OPTIONS.DATE_NEWEST); }}
@@ -300,17 +311,50 @@ function HomeScreen({ navigation }) {
       )}
 
       {books.length === 0 ? (
-        <View style={styles.empty}>
-          <Text style={styles.emptyTitle}>No books yet</Text>
-          <Text style={styles.emptySubtitle}>Tap + to add</Text>
-        </View>
+        <EmptyState
+          icon="library-outline"
+          title="No books yet"
+          subtitle="Tap + to add your first book"
+          actionLabel="Add Book"
+          onAction={() => setModalVisible(true)}
+          theme={theme}
+        />
       ) : (
         <>
           {filteredBooks.length === 0 ? (
-            <View style={[styles.empty, { paddingTop: 20 }]}>
-              <Text style={styles.emptyTitle}>No results</Text>
-              <Text style={styles.emptySubtitle}>Try a different search term</Text>
-            </View>
+            <EmptyState
+              icon="search-outline"
+              title="No results"
+              subtitle="Try a different search term"
+              theme={theme}
+            />
+          ) : viewMode === 'grid' ? (
+            <FlatList
+              data={filteredBooks}
+              keyExtractor={i => i.id}
+              numColumns={2}
+              contentContainerStyle={{ padding: 12 }}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Details', { bookId: item.id })}
+                  style={{ flex: 1, margin: 6, borderRadius: 10, overflow: 'hidden', backgroundColor: colors.card }}
+                  accessibilityLabel={`Book: ${item.title}`}
+                  accessibilityRole="button"
+                >
+                  {item.coverUrl ? (
+                    <Image source={{ uri: item.coverUrl }} style={{ width: '100%', height: 140 }} resizeMode="cover" />
+                  ) : (
+                    <View style={{ width: '100%', height: 140, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }}>
+                      <Ionicons name="book" size={32} color="#fff" />
+                    </View>
+                  )}
+                  <View style={{ padding: 8 }}>
+                    <Text style={{ fontSize: 12, fontWeight: '600', color: colors.text }} numberOfLines={2}>{item.title}</Text>
+                    <Text style={{ fontSize: 10, color: colors.tint }} numberOfLines={1}>{item.author || 'Unknown'}</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
           ) : (
             <FlatList data={filteredBooks} keyExtractor={i => i.id} renderItem={renderItem} contentContainerStyle={{ padding: 12 }} />
           )}

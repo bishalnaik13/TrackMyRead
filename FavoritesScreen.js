@@ -7,6 +7,7 @@ import { getStyles, getColors } from './styles';
 import { ThemeContext } from './ThemeContext';
 import { useBooks } from './BooksContext';
 import { navigationShape } from './types';
+import EmptyState from './components/EmptyState';
 
 function FavoritesScreen({ navigation }) {
   const { theme } = useContext(ThemeContext);
@@ -51,10 +52,12 @@ function FavoritesScreen({ navigation }) {
       style={styles.screen}
     >
       {favs.length === 0 ? (
-        <View style={styles.empty}>
-          <Text style={styles.emptyTitle}>No favorites yet</Text>
-          <Text style={styles.emptySubtitle}>Mark a book as favorite from Home</Text>
-        </View>
+        <EmptyState
+          icon="heart-outline"
+          title="No favorites yet"
+          subtitle="Mark a book as favorite from Home"
+          theme={theme}
+        />
       ) : (
         <FlatList
           data={favs}

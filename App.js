@@ -2,7 +2,7 @@ import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -57,15 +57,45 @@ function HomeStack({ navigation: parentNav }) {
   );
 }
 
-function getIconName(routeName, focused) {
-  if (routeName === 'Home') return focused ? 'home' : 'home-outline';
-  if (routeName === 'Favorites') return focused ? 'heart' : 'heart-outline';
-  return 'ellipse';
+function TabIconWithBadge({ routeName, focused, favoritesCount }) {
+  const getIconName = () => {
+    if (routeName === 'Home') return focused ? 'home' : 'home-outline';
+    if (routeName === 'Favorites') return focused ? 'heart' : 'heart-outline';
+    return 'ellipse';
+  };
+
+  const iconName = getIconName();
+  const showBadge = routeName === 'Favorites' && favoritesCount > 0;
+
+  return (
+    <View style={{ position: 'relative' }}>
+      <Ionicons name={iconName} size={24} color={focused ? '#007AFF' : '#666666'} />
+      {showBadge && (
+        <View style={{
+          position: 'absolute',
+          top: -4,
+          right: -8,
+          backgroundColor: '#E91E63',
+          borderRadius: 8,
+          minWidth: 16,
+          height: 16,
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingHorizontal: 4,
+        }}>
+          <Text style={{ color: '#fff', fontSize: 10, fontWeight: '600' }}>
+            {favoritesCount > 99 ? '99+' : favoritesCount}
+          </Text>
+        </View>
+      )}
+    </View>
+  );
 }
 
 function MainApp() {
   const { theme, setTheme } = useContext(ThemeContext);
-  const { trash, undoDelete } = useBooks();
+  const { trash, undoDelete, getFavorites } = useBooks();
+  const favoritesCount = getFavorites().length;
 
   useEffect(() => {
     (async () => {
@@ -113,8 +143,8 @@ function MainApp() {
                   tabBarActiveTintColor: navTheme.colors.primary,
                   tabBarInactiveTintColor: navTheme.colors.text,
                   tabBarStyle: { backgroundColor: navTheme.colors.card },
-                  tabBarIcon: ({ focused, color, size }) => (
-                    <Ionicons name={getIconName(route.name, focused)} size={size} color={color} />
+                  tabBarIcon: ({ focused, route }) => (
+                    <TabIconWithBadge routeName={route ? route.name : 'Home'} focused={focused} favoritesCount={favoritesCount} />
                   ),
                 })}
               >

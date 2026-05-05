@@ -193,3 +193,49 @@ This document outlines the phased development plan for the TrackMyRead app, a Re
 - Phase 2: UX Polish (snackbar, accessibility, debounce) - COMMITTED
 - Phase 3: Features (covers, sorting, export/import, swipe) - COMMITTED
 - Phase 4: Testing & CI (Jest tests, GitHub Actions, PropTypes) - COMMITTED
+
+---
+
+## Phase 6: UI/UX Polish & Navigation Enhancement (Current)
+**Goal:** Improve visual experience, navigation flow, and layout design
+
+### Task 6.1: Loading & Empty States
+- **Files to modify:** `HomeScreen.js`, `FavoritesScreen.js`, `DetailsScreen.js`
+- **Create:** `components/EmptyState.js`, `components/LoadingState.js`
+- **Description:**
+  - Add skeleton loaders for book list
+  - Improve empty state designs with icons and call-to-actions
+  - Better loading spinners and progress indicators
+- **Acceptance:** Users see polished visual feedback during loading/empty states
+
+### Task 6.2: Navigation Enhancements
+- **Files to modify:** `App.js`, `styles.js`
+- **Description:**
+  - Add badge on bottom tab showing favorites count
+  - Improve drawer menu with icons and active state highlighting
+  - Enhance stack navigation transitions
+- **Acceptance:** Better navigation experience with visual feedback
+
+### Task 6.3: Layout Improvements
+- **Files to modify:** `HomeScreen.js`, `styles.js`
+- **Description:**
+  - Add toggle between List and Grid view on Home screen
+  - Improve book card design (larger cover option, more metadata)
+  - Better responsive layout handling for different screen sizes
+- **Acceptance:** Users can switch between list/grid views
+
+### Task 6.4: Animation Polish
+- **Files to modify:** Multiple files
+- **Description:**
+  - Ensure all animations use `useNativeDriver: true`
+  - Add smooth page transitions
+  - Improve touch feedback animations
+- **Acceptance:** Smoother, more responsive animations throughout app
+
+### Task 6.5: Theme Enhancement
+- **Files to modify:** `ThemeContext.js`, `SettingsScreen.js`, `styles.js`
+- **Description:**
+  - Add option for system theme (follow device settings)
+  - Improve color consistency across all screens
+  - Add more theme customization options
+- **Acceptance:** Users can choose system/light/dark theme
