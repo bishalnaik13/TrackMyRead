@@ -147,33 +147,35 @@ function DetailsScreen({ route, navigation }) {
           </View>
         ) : (
           !editing && (
-            <TouchableOpacity
-              onPress={handleSearchCover}
-              disabled={fetchingCover}
-              style={{ alignItems: 'center', paddingVertical: 12 }}
-              accessibilityLabel="Search for book cover"
-              accessibilityRole="button"
-            >
-              {fetchingCover ? (
-                <ActivityIndicator size="small" color={colors.primary} />
-              ) : (
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              <TouchableOpacity
+                onPress={handleSearchCover}
+                disabled={fetchingCover}
+                style={{ alignItems: 'center', paddingVertical: 12, flex: 1 }}
+                accessibilityLabel="Search for book cover"
+                accessibilityRole="button"
+              >
+                {fetchingCover ? (
+                  <ActivityIndicator size="small" color={colors.primary} />
+                ) : (
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Ionicons name="image-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
+                    <Text style={{ color: colors.primary }}>Search cover</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handlePickFromGallery}
+                style={{ paddingVertical: 12, paddingHorizontal: 12 }}
+                accessibilityLabel="Pick cover from gallery"
+                accessibilityRole="button"
+              >
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Ionicons name="image-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
-                  <Text style={{ color: colors.primary }}>Search cover</Text>
+                  <Ionicons name="images-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
+                  <Text style={{ color: colors.primary, fontSize: 12 }}>Gallery</Text>
                 </View>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handlePickFromGallery}
-              style={{ marginLeft: 12, paddingVertical: 6, paddingHorizontal: 12 }}
-              accessibilityLabel="Pick cover from gallery"
-              accessibilityRole="button"
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Ionicons name="images-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
-                <Text style={{ color: colors.primary, fontSize: 12 }}>Gallery</Text>
-              </View>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </View>
           )
         )}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
