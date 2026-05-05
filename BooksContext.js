@@ -40,22 +40,82 @@ export function BooksProvider({ children }) {
     return newBook;
   }, []);
 
-  const fetchBookCover = useCallback(async (title, author) => {
+  const fetchBookCover = useCallback(async (title, author, isbn = '') => {
     try {
-      const query = encodeURIComponent(`${title} ${author}`.trim());
+      let query;
+      if (isbn && isbn.length >= 10) {
+        query = encodeURIComponent(`isbn:${isbn.replace(/[-\s]/g, '')}`);
+      } else {
+        query = encodeURIComponent(`${title} ${author}`.trim());
+      }
+
       const response = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1`
+        `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=10`
       );
       const data = await response.json();
-      if (data.items && data.items[0]?.volumeInfo?.imageLinks?.thumbnail) {
-        let coverUrl = data.items[0].volumeInfo.imageLinks.thumbnail;
-        if (coverUrl.startsWith('http://')) {
-          coverUrl = coverUrl.replace('http://', 'https://');
+
+      if (data.items && data.items.length > 0) {
+        const covers = [];
+        for (const item of data.items) {
+          const volumeInfo = item.volumeInfo;
+          if (volumeInfo.imageLinks?.thumbnail) {
+            let coverUrl = volumeInfo.imageLinks.thumbnail;
+            if (coverUrl.startsWith('http://')) {
+              coverUrl = coverUrl.replace('http://', 'https://');
+            }
+            covers.push({
+              url: coverUrl,
+              title: volumeInfo.title || title,
+              authors: volumeInfo.authors || [],
+              publishedDate: volumeInfo.publishedDate || '',
+              description: volumeInfo.description || '',
+            });
+          }
+          if (covers.length >= 5) break;
         }
-        return coverUrl;
+
+        if (covers.length === 1) {
+          return { single: covers[0].url };
+        } else if (covers.length > 1) {
+          return { multiple: covers };
+        }
       }
     } catch (error) {
       console.error('Error fetching book cover:', error);
+    }
+    return null;
+  }, []);
+
+  const fetchMultipleCovers = useCallback(async (title, author) => {
+    try {
+      const query = encodeURIComponent(`${title} ${author}`.trim());
+      const response = await fetch(
+        `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=10`
+      );
+      const data = await response.json();
+
+      if (data.items && data.items.length > 0) {
+        const covers = [];
+        for (const item of data.items) {
+          const volumeInfo = item.volumeInfo;
+          if (volumeInfo.imageLinks?.thumbnail) {
+            let coverUrl = volumeInfo.imageLinks.thumbnail;
+            if (coverUrl.startsWith('http://')) {
+              coverUrl = coverUrl.replace('http://', 'https://');
+            }
+            covers.push({
+              url: coverUrl,
+              title: volumeInfo.title || title,
+              authors: volumeInfo.authors || [],
+              publishedDate: volumeInfo.publishedDate || '',
+            });
+          }
+          if (covers.length >= 6) break;
+        }
+        return covers.length > 0 ? covers : null;
+      }
+    } catch (error) {
+      console.error('Error fetching multiple covers:', error);
     }
     return null;
   }, []);
@@ -180,6 +240,7 @@ export function BooksProvider({ children }) {
     filterBooks,
     trash,
     fetchBookCover,
+    fetchMultipleCovers,
     updateBookCover,
   };
 

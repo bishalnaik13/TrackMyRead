@@ -1,7 +1,8 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Alert, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Alert, ScrollView, Image, ActivityIndicator, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import PropTypes from 'prop-types';
 import { getStyles, getColors } from './styles';
 import { ThemeContext } from './ThemeContext';
@@ -11,13 +12,15 @@ import { navigationShape, routeShape } from './types';
 
 function DetailsScreen({ route, navigation }) {
   const { bookId } = route.params || {};
-  const { getBookById, updateBook, removeBook, toggleFavorite, setStatus, undoDelete, trash, fetchBookCover, updateBookCover } = useBooks();
+  const { getBookById, updateBook, removeBook, toggleFavorite, setStatus, undoDelete, trash, fetchBookCover, fetchMultipleCovers, updateBookCover } = useBooks();
   const book = getBookById(bookId);
 
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(book ? book.title : '');
   const [author, setAuthor] = useState(book ? book.author : '');
   const [notes, setNotes] = useState(book ? book.notes : '');
+  const [coverOptions, setCoverOptions] = useState([]);
+  const [showCoverPicker, setShowCoverPicker] = useState(false);
   const [fetchingCover, setFetchingCover] = useState(false);
 
   const { theme } = useContext(ThemeContext);
@@ -81,9 +84,15 @@ function DetailsScreen({ route, navigation }) {
   async function handleSearchCover() {
     setFetchingCover(true);
     try {
-      const cover = await fetchBookCover(book.title, book.author);
-      if (cover) {
-        updateBookCover(bookId, cover);
+      const result = await fetchBookCover(book.title, book.author);
+      if (result?.multiple) {
+        setCoverOptions(result.multiple);
+        setShowCoverPicker(true);
+      } else if (result?.single) {
+        updateBookCover(bookId, result.single);
+        Alert.alert('Success', 'Book cover found!');
+      } else if (result) {
+        updateBookCover(bookId, result);
         Alert.alert('Success', 'Book cover found!');
       } else {
         Alert.alert('Not Found', 'Could not find a cover for this book');
@@ -92,6 +101,32 @@ function DetailsScreen({ route, navigation }) {
       Alert.alert('Error', 'Failed to search for cover');
     }
     setFetchingCover(false);
+  }
+
+  async function handlePickFromGallery() {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+    if (!permissionResult.granted) {
+      Alert.alert('Permission Required', 'Please allow access to your photo library to select cover images.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [2, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      updateBookCover(bookId, result.assets[0].uri);
+    }
+  }
+
+  function handleSelectCover(selectedUrl) {
+    updateBookCover(bookId, selectedUrl);
+    setCoverOptions([]);
+    setShowCoverPicker(false);
   }
 
   function handleRemoveCover() {
@@ -127,6 +162,17 @@ function DetailsScreen({ route, navigation }) {
                   <Text style={{ color: colors.primary }}>Search cover</Text>
                 </View>
               )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handlePickFromGallery}
+              style={{ marginLeft: 12, paddingVertical: 6, paddingHorizontal: 12 }}
+              accessibilityLabel="Pick cover from gallery"
+              accessibilityRole="button"
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name="images-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
+                <Text style={{ color: colors.primary, fontSize: 12 }}>Gallery</Text>
+              </View>
             </TouchableOpacity>
           )
         )}
@@ -247,6 +293,35 @@ function DetailsScreen({ route, navigation }) {
           </>
         )}
       </ScrollView>
+
+      <Modal visible={showCoverPicker} transparent animationType="fade" onRequestClose={() => setShowCoverPicker(false)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: 20 }}>
+          <View style={{ backgroundColor: colors.card, borderRadius: 12, padding: 16, maxHeight: '80%' }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <Text style={{ fontSize: 18, fontWeight: '600', color: colors.text }}>Select Cover</Text>
+              <TouchableOpacity onPress={() => setShowCoverPicker(false)}>
+                <Ionicons name="close" size={24} color={colors.tint} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={{ flexDirection: 'row' }}>
+                {coverOptions.map((cover, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => handleSelectCover(cover.url)}
+                    style={{ marginRight: 12 }}
+                  >
+                    <Image source={{ uri: cover.url }} style={{ width: 100, height: 150, borderRadius: 8 }} />
+                    <Text style={{ color: colors.tint, fontSize: 10, marginTop: 4, textAlign: 'center' }} numberOfLines={1}>
+                      {cover.publishedDate ? cover.publishedDate.substring(0, 4) : 'Unknown'}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

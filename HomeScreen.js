@@ -2,6 +2,7 @@ import React, { useState, useContext, useRef, useEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity, Modal, TextInput, FlatList, KeyboardAvoidingView, Platform, ScrollView, Image, ActivityIndicator, Alert, Animated, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import PropTypes from 'prop-types';
 import { getStyles, getColors } from './styles';
 import { ThemeContext } from './ThemeContext';
@@ -17,13 +18,15 @@ function HomeScreen({ navigation }) {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [coverUrl, setCoverUrl] = useState('');
   const [fetchingCover, setFetchingCover] = useState(false);
+  const [coverOptions, setCoverOptions] = useState([]);
+  const [showCoverPicker, setShowCoverPicker] = useState(false);
   const [sortBy, setSortBy] = useState(SORT_OPTIONS.DATE_NEWEST);
   const [filterBy, setFilterBy] = useState(FILTER_OPTIONS.ALL);
   const [showSortFilter, setShowSortFilter] = useState(false);
   const debounceTimeout = useRef(null);
 
   const { theme } = useContext(ThemeContext);
-  const { books, addBook, toggleFavorite, searchBooks, fetchBookCover, sortBooks, filterBooks, removeBook } = useBooks();
+  const { books, addBook, toggleFavorite, searchBooks, fetchBookCover, fetchMultipleCovers, sortBooks, filterBooks, removeBook } = useBooks();
 
   const styles = getStyles(theme);
   const colors = getColors(theme);
@@ -59,9 +62,15 @@ function HomeScreen({ navigation }) {
     }
     setFetchingCover(true);
     try {
-      const cover = await fetchBookCover(title, author);
-      if (cover) {
-        setCoverUrl(cover);
+      const result = await fetchBookCover(title, author);
+      if (result?.multiple) {
+        setCoverOptions(result.multiple);
+        setShowCoverPicker(true);
+      } else if (result?.single) {
+        setCoverUrl(result.single);
+        Alert.alert('Success', 'Book cover found!');
+      } else if (result) {
+        setCoverUrl(result);
         Alert.alert('Success', 'Book cover found!');
       } else {
         Alert.alert('Not Found', 'Could not find a cover for this book');
@@ -70,6 +79,34 @@ function HomeScreen({ navigation }) {
       Alert.alert('Error', 'Failed to search for cover');
     }
     setFetchingCover(false);
+  }
+
+  async function handlePickFromGallery() {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+    if (!permissionResult.granted) {
+      Alert.alert('Permission Required', 'Please allow access to your photo library to select cover images.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [2, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      setCoverUrl(result.assets[0].uri);
+      setCoverOptions([]);
+      setShowCoverPicker(false);
+    }
+  }
+
+  function handleSelectCover(selectedUrl) {
+    setCoverUrl(selectedUrl);
+    setCoverOptions([]);
+    setShowCoverPicker(false);
   }
 
   function handleAddBook() {
@@ -327,22 +364,35 @@ function HomeScreen({ navigation }) {
                   </TouchableOpacity>
                 </View>
               ) : (
-                <TouchableOpacity
-                  style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, marginTop: 4 }}
-                  onPress={handleSearchCover}
-                  disabled={fetchingCover}
-                  accessibilityLabel="Search for book cover"
-                  accessibilityRole="button"
-                >
-                  {fetchingCover ? (
-                    <ActivityIndicator size="small" color={colors.primary} />
-                  ) : (
-                    <>
-                      <Ionicons name="image-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
-                      <Text style={{ color: colors.primary }}>Search cover from Google</Text>
-                    </>
-                  )}
-                </TouchableOpacity>
+                <View style={{ marginTop: 8 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 8 }}>
+                    <TouchableOpacity
+                      style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, marginRight: 4, backgroundColor: colors.card, borderRadius: 8 }}
+                      onPress={handleSearchCover}
+                      disabled={fetchingCover}
+                      accessibilityLabel="Search for book cover"
+                      accessibilityRole="button"
+                    >
+                      {fetchingCover ? (
+                        <ActivityIndicator size="small" color={colors.primary} />
+                      ) : (
+                        <>
+                          <Ionicons name="search" size={16} color={colors.primary} style={{ marginRight: 6 }} />
+                          <Text style={{ color: colors.primary, fontSize: 13 }}>Search Google</Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, marginLeft: 4, backgroundColor: colors.card, borderRadius: 8 }}
+                      onPress={handlePickFromGallery}
+                      accessibilityLabel="Pick cover from gallery"
+                      accessibilityRole="button"
+                    >
+                      <Ionicons name="images-outline" size={16} color={colors.primary} style={{ marginRight: 6 }} />
+                      <Text style={{ color: colors.primary, fontSize: 13 }}>From Gallery</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               )}
               <View style={styles.row}>
                 <TouchableOpacity
@@ -365,6 +415,35 @@ function HomeScreen({ navigation }) {
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
+      </Modal>
+
+      <Modal visible={showCoverPicker} transparent animationType="fade" onRequestClose={() => setShowCoverPicker(false)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: 20 }}>
+          <View style={{ backgroundColor: colors.card, borderRadius: 12, padding: 16, maxHeight: '80%' }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <Text style={{ fontSize: 18, fontWeight: '600', color: colors.text }}>Select Cover</Text>
+              <TouchableOpacity onPress={() => setShowCoverPicker(false)}>
+                <Ionicons name="close" size={24} color={colors.tint} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={{ flexDirection: 'row' }}>
+                {coverOptions.map((cover, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => handleSelectCover(cover.url)}
+                    style={{ marginRight: 12 }}
+                  >
+                    <Image source={{ uri: cover.url }} style={{ width: 100, height: 150, borderRadius: 8 }} />
+                    <Text style={{ color: colors.tint, fontSize: 10, marginTop: 4, textAlign: 'center' }} numberOfLines={1}>
+                      {cover.publishedDate ? cover.publishedDate.substring(0, 4) : 'Unknown'}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+        </View>
       </Modal>
     </SafeAreaView>
   );

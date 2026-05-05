@@ -27,7 +27,7 @@ This document outlines the phased development plan for the TrackMyRead app, a Re
 
 ### Task 1.4: Replace Date.now() IDs with uuid
 - **Files to modify:** `HomeScreen.js`, `BooksContext.js`
-- **Add dependency:** `uuid`
+- **Add dependency:** `react-native-uuid`
 - **Description:** Use uuid.v4() for book IDs instead of Date.now()
 - **Acceptance:** No ID collisions possible
 
@@ -64,7 +64,7 @@ This document outlines the phased development plan for the TrackMyRead app, a Re
 
 ### Task 3.1: Add Book Covers
 - **Files to modify:** `HomeScreen.js`, `DetailsScreen.js`, `styles.js`
-- **Add dependency:** `expo-image-picker` or Google Books API
+- **Add dependency:** Google Books API
 - **Description:** Allow users to add cover images from gallery or fetch from API
 - **Acceptance:** Books can display cover images
 
@@ -91,8 +91,8 @@ This document outlines the phased development plan for the TrackMyRead app, a Re
 **Goal:** Reliability and maintainability
 
 ### Task 4.1: Add Jest Tests
-- **Files to create:** `__tests__/BooksContext.test.js`, `__tests__/storage.test.js`
-- **Add dependency:** `jest`, `@testing-library/react-native`
+- **Files to create:** `__tests__/storage.test.js`, `__tests__/constants.test.js`
+- **Add dependency:** `jest`, `@testing-library/react-native`, `react-test-renderer`
 - **Description:** Write unit tests for core logic
 - **Acceptance:** Core functions have test coverage
 
@@ -101,20 +101,83 @@ This document outlines the phased development plan for the TrackMyRead app, a Re
 - **Description:** Run tests and lint on every PR
 - **Acceptance:** CI checks appear on PRs
 
-### Task 4.3: Add PropTypes or TypeScript
-- **Files to modify:** Multiple files
+### Task 4.3: Add PropTypes
+- **Files to modify:** `HomeScreen.js`, `DetailsScreen.js`, `FavoritesScreen.js`
+- **Create:** `types.js`
 - **Description:** Add type safety to components
-- **Acceptance:** Code has type checking
+- **Acceptance:** Code has PropTypes defined
+
+---
+
+## Phase 5: Enhancements & New Features (Current)
+**Goal:** Enhance existing functionality and add new features
+
+### Task 5.1: Improve Book Cover Matching
+- **Files to modify:** `HomeScreen.js`, `DetailsScreen.js`, `BooksContext.js`
+- **Add dependency:** `expo-image-picker`
+- **Description:**
+  - Add ISBN lookup support for more accurate results
+  - Allow manual cover image upload from device gallery
+  - Add edition/version selection when multiple covers found
+  - Cache covers locally for offline use
+- **Acceptance:** More precise book cover matching with manual override option
+- **Note:** Current implementation needs improvement for precise matching by version/part
+
+### Task 5.2: Reading Statistics & Progress
+- **Files to create:** `StatsScreen.js`
+- **Files to modify:** `App.js`, `BooksContext.js`, `constants.js`
+- **Description:**
+  - Add books read count (completed status)
+  - Monthly/yearly reading stats
+  - Visual progress dashboard
+  - Average pages per book tracking
+- **Acceptance:** Users can view their reading statistics and progress
+
+### Task 5.3: Book Categories/Tags
+- **Files to modify:** `BooksContext.js`, `HomeScreen.js`, `utils/storage.js`, `styles.js`
+- **Description:**
+  - Add custom tags to books
+  - Filter books by multiple tags
+  - Tag management (create, edit, delete)
+  - Tag-based search
+- **Acceptance:** Users can organize books with custom tags
+
+### Task 5.4: Reading Goals
+- **Files to modify:** `SettingsScreen.js`, `BooksContext.js`, `utils/storage.js`
+- **Description:**
+  - Set annual reading goal (number of books)
+  - Track progress towards goal
+  - Display goal progress on home screen
+  - Yearly goal reset option
+- **Acceptance:** Users can set and track reading goals
+
+### Task 5.5: Performance & Polish
+- **Files to modify:** Multiple files
+- **Description:**
+  - Optimize app startup time
+  - Reduce bundle size with code splitting
+  - Add error boundaries for graceful crash handling
+  - Improve animations (useNativeDriver)
+  - Optimize list rendering with FlatList optimizations
+- **Acceptance:** Faster, smoother app experience
+
+### Task 5.6: Search Enhancements
+- **Files to modify:** `HomeScreen.js`, `BooksContext.js`
+- **Description:**
+  - Add ISBN/barcode scanning using camera
+  - Advanced filtering options (favorites, date range, author)
+  - Recent search history
+  - Search within notes
+- **Acceptance:** Enhanced search capabilities
 
 ---
 
 ## Implementation Notes
 
-### Dependencies to Add
-- `uuid` - for unique ID generation
-- `jest` + `@testing-library/react-native` - for testing
-- `expo-image-picker` - for cover images
-- `expo-sharing` + `expo-file-system` - for export/import
+### Dependencies to Add (Phase 5)
+- `expo-image-picker` - for manual cover upload
+- `expo-camera` - for barcode scanning (optional)
+- Additional testing libraries as needed
 
 ### Git Commit Strategy
 - One logical commit per task
@@ -124,3 +187,9 @@ This document outlines the phased development plan for the TrackMyRead app, a Re
 ### Testing Strategy
 - Run tests locally before committing
 - Ensure app still works after each change
+
+### Previous Cycles Completed
+- Phase 1: Foundation (storage, context, constants, uuid) - COMMITTED
+- Phase 2: UX Polish (snackbar, accessibility, debounce) - COMMITTED
+- Phase 3: Features (covers, sorting, export/import, swipe) - COMMITTED
+- Phase 4: Testing & CI (Jest tests, GitHub Actions, PropTypes) - COMMITTED
