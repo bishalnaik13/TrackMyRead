@@ -137,14 +137,14 @@ function MainApp() {
           <Drawer.Screen name="Main">
             {() => (
               <Tab.Navigator
-                screenOptions={({ route }) => ({
+                screenOptions={({ route: navRoute }) => ({
                   headerShown: false,
                   headerTitleAlign: 'center',
                   tabBarActiveTintColor: navTheme.colors.primary,
                   tabBarInactiveTintColor: navTheme.colors.text,
                   tabBarStyle: { backgroundColor: navTheme.colors.card },
-                  tabBarIcon: ({ focused, route }) => (
-                    <TabIconWithBadge routeName={route ? route.name : 'Home'} focused={focused} favoritesCount={favoritesCount} />
+                  tabBarIcon: ({ focused }) => (
+                    <TabIconWithBadge routeName={navRoute ? navRoute.name : 'Home'} focused={focused} favoritesCount={favoritesCount} />
                   ),
                 })}
               >
