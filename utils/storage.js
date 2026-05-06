@@ -4,6 +4,7 @@ const BOOKS_KEY = '@books';
 const THEME_KEY = '@theme';
 const SCHEMA_VERSION_KEY = '@schema_version';
 const READING_GOAL_KEY = '@reading_goal';
+const COLLECTIONS_KEY = '@collections';
 
 const CURRENT_SCHEMA_VERSION = 2;
 
@@ -196,4 +197,30 @@ export function mergeBooks(existingBooks, newBooks, mode = 'replace') {
   const existingIds = new Set(existingBooks.map(b => b.id));
   const uniqueNewBooks = newBooks.filter(b => !existingIds.has(b.id));
   return [...existingBooks, ...uniqueNewBooks];
+}
+
+export async function loadCollections() {
+  try {
+    const raw = await AsyncStorage.getItem(COLLECTIONS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed;
+  } catch (error) {
+    console.error('Error loading collections:', error);
+    return [];
+  }
+}
+
+export async function saveCollections(collections) {
+  try {
+    if (!Array.isArray(collections)) {
+      return false;
+    }
+    await AsyncStorage.setItem(COLLECTIONS_KEY, JSON.stringify(collections));
+    return true;
+  } catch (error) {
+    console.error('Error saving collections:', error);
+    return false;
+  }
 }

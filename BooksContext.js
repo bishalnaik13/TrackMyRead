@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import uuid from 'react-native-uuid';
-import { initializeStorage, saveBooks } from './utils/storage';
+import { initializeStorage, saveBooks, loadCollections, saveCollections } from './utils/storage';
 import { BOOK_STATUS } from './constants';
 
 export const calculateProgress = (currentPage, totalPages) => {
@@ -15,14 +15,23 @@ export function BooksProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [trash, setTrash] = useState(null);
   const [trashTimer, setTrashTimer] = useState(null);
+  const [collections, setCollections] = useState([]);
 
   useEffect(() => {
     (async () => {
       const loadedBooks = await initializeStorage();
+      const loadedCollections = await loadCollections();
       setBooks(loadedBooks);
+      setCollections(loadedCollections);
       setLoading(false);
     })();
   }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      saveCollections(collections);
+    }
+  }, [collections, loading]);
 
   useEffect(() => {
     if (!loading) {
@@ -211,6 +220,62 @@ export function BooksProvider({ children }) {
     );
   }, []);
 
+  const addCollection = useCallback((name) => {
+    const newCollection = {
+      id: uuid.v4(),
+      name: name.trim(),
+      createdAt: Date.now(),
+    };
+    setCollections(prev => [...prev, newCollection]);
+    return newCollection;
+  }, []);
+
+  const deleteCollection = useCallback((id) => {
+    setCollections(prev => prev.filter(c => c.id !== id));
+    setBooks(prev =>
+      prev.map(book => ({
+        ...book,
+        collections: (book.collections || []).filter(cid => cid !== id),
+      }))
+    );
+  }, []);
+
+  const renameCollection = useCallback((id, name) => {
+    setCollections(prev =>
+      prev.map(c => c.id === id ? { ...c, name: name.trim() } : c)
+    );
+  }, []);
+
+  const addBookToCollection = useCallback((bookId, collectionId) => {
+    setBooks(prev =>
+      prev.map(book =>
+        book.id === bookId
+          ? { ...book, collections: [...new Set([...(book.collections || []), collectionId])] }
+          : book
+      )
+    );
+  }, []);
+
+  const removeBookFromCollection = useCallback((bookId, collectionId) => {
+    setBooks(prev =>
+      prev.map(book =>
+        book.id === bookId
+          ? { ...book, collections: (book.collections || []).filter(cid => cid !== collectionId) }
+          : book
+      )
+    );
+  }, []);
+
+  const getBooksInCollection = useCallback((collectionId) => {
+    return books.filter(b => (b.collections || []).includes(collectionId));
+  }, [books]);
+
+  const getBookCollections = useCallback((bookId) => {
+    const book = books.find(b => b.id === bookId);
+    if (!book || !book.collections) return [];
+    return book.collections.map(cid => collections.find(c => c.id === cid)).filter(Boolean);
+  }, [books, collections]);
+
   const getBookById = useCallback((id) => {
     return books.find(b => b.id === id) || null;
   }, [books]);
@@ -276,6 +341,14 @@ export function BooksProvider({ children }) {
     fetchBookCover,
     fetchMultipleCovers,
     updateBookCover,
+    collections,
+    addCollection,
+    deleteCollection,
+    renameCollection,
+    addBookToCollection,
+    removeBookFromCollection,
+    getBooksInCollection,
+    getBookCollections,
   };
 
   return (

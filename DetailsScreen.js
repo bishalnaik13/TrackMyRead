@@ -12,7 +12,7 @@ import { navigationShape, routeShape } from './types';
 
 function DetailsScreen({ route, navigation }) {
   const { bookId } = route.params || {};
-  const { getBookById, updateBook, removeBook, toggleFavorite, setStatus, setRating, setProgress, calculateProgress, undoDelete, trash, fetchBookCover, fetchMultipleCovers, updateBookCover } = useBooks();
+  const { getBookById, updateBook, removeBook, toggleFavorite, setStatus, setRating, setProgress, calculateProgress, undoDelete, trash, fetchBookCover, fetchMultipleCovers, updateBookCover, collections, addBookToCollection, removeBookFromCollection, getBookCollections } = useBooks();
   const book = getBookById(bookId);
 
   const [editing, setEditing] = useState(false);
@@ -21,6 +21,7 @@ function DetailsScreen({ route, navigation }) {
   const [notes, setNotes] = useState(book ? book.notes : '');
   const [coverOptions, setCoverOptions] = useState([]);
   const [showCoverPicker, setShowCoverPicker] = useState(false);
+  const [showCollectionPicker, setShowCollectionPicker] = useState(false);
   const [fetchingCover, setFetchingCover] = useState(false);
 
   const { theme } = useContext(ThemeContext);
@@ -367,6 +368,32 @@ function DetailsScreen({ route, navigation }) {
           </Text>
         </View>
       )}
+
+      <View style={{ borderTopWidth: 1, borderColor: colors.neutral, marginTop: 16, paddingTop: 16 }}>
+        <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 12 }}>
+          Collections
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+          {getBookCollections(bookId).map(collection => (
+            <TouchableOpacity
+              key={collection.id}
+              onPress={() => removeBookFromCollection(bookId, collection.id)}
+              style={{ backgroundColor: colors.primary, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16, marginRight: 8, marginBottom: 8, flexDirection: 'row', alignItems: 'center' }}
+              accessibilityLabel={`Remove from ${collection.name}`}
+            >
+              <Text style={{ color: colors.buttonText, fontSize: 12 }}>{collection.name}</Text>
+              <Ionicons name="close-circle" size={14} color={colors.buttonText} style={{ marginLeft: 4 }} />
+            </TouchableOpacity>
+          ))}
+          <TouchableOpacity
+            onPress={() => setShowCollectionPicker(true)}
+            style={{ borderWidth: 1, borderColor: colors.primary, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16 }}
+            accessibilityLabel="Add to collection"
+          >
+            <Text style={{ color: colors.primary, fontSize: 12 }}>+ Add</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
       </ScrollView>
 
       <Modal visible={showCoverPicker} transparent animationType="fade" onRequestClose={() => setShowCoverPicker(false)}>
@@ -394,6 +421,52 @@ function DetailsScreen({ route, navigation }) {
                 ))}
               </View>
             </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={showCollectionPicker} transparent animationType="fade" onRequestClose={() => setShowCollectionPicker(false)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: 20 }}>
+          <View style={{ backgroundColor: colors.card, borderRadius: 12, padding: 16, maxHeight: '80%' }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <Text style={{ fontSize: 18, fontWeight: '600', color: colors.text }}>Add to Collection</Text>
+              <TouchableOpacity onPress={() => setShowCollectionPicker(false)}>
+                <Ionicons name="close" size={24} color={colors.tint} />
+              </TouchableOpacity>
+            </View>
+            {collections.length === 0 ? (
+              <Text style={{ color: colors.tint, textAlign: 'center', padding: 20 }}>
+                No collections yet. Create one in the Collections screen.
+              </Text>
+            ) : (
+              <ScrollView>
+                {collections.map(collection => {
+                  const isInCollection = (book.collections || []).includes(collection.id);
+                  return (
+                    <TouchableOpacity
+                      key={collection.id}
+                      onPress={() => {
+                        if (!isInCollection) {
+                          addBookToCollection(bookId, collection.id);
+                        }
+                        setShowCollectionPicker(false);
+                      }}
+                      style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.neutral }}
+                      disabled={isInCollection}
+                    >
+                      <Ionicons
+                        name={isInCollection ? 'checkmark-circle' : 'add-circle-outline'}
+                        size={24}
+                        color={isInCollection ? colors.primary : colors.tint}
+                      />
+                      <Text style={{ marginLeft: 12, color: isInCollection ? colors.tint : colors.text }}>
+                        {collection.name}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            )}
           </View>
         </View>
       </Modal>

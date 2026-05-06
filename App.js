@@ -16,6 +16,8 @@ import FavoritesScreen from './FavoritesScreen';
 import SettingsScreen from './SettingsScreen';
 import AboutScreen from './AboutScreen';
 import StatsScreen from './StatsScreen';
+import CollectionsScreen from './CollectionsScreen';
+import CollectionDetailScreen from './CollectionDetailScreen';
 import Snackbar from './components/Snackbar';
 
 import { ThemeContext } from './ThemeContext';
@@ -178,6 +180,29 @@ function MainApp() {
               headerTintColor: palette.text,
             }}>
             {(props) => <StatsScreen {...props} />}
+          </Drawer.Screen>
+          <Drawer.Screen
+            name="Collections"
+            options={{
+              headerShown: true,
+              headerTitleAlign: 'center',
+              title: 'Collections',
+              headerStyle: { backgroundColor: palette.card },
+              headerTintColor: palette.text,
+            }}>
+            {() => (
+              <Stack.Navigator>
+                <Stack.Screen name="CollectionsList">
+                  {(props) => <CollectionsScreen {...props} />}
+                </Stack.Screen>
+                <Stack.Screen name="CollectionDetail">
+                  {(props) => <CollectionDetailScreen {...props} />}
+                </Stack.Screen>
+                <Stack.Screen name="Details">
+                  {(props) => <DetailsScreen {...props} />}
+                </Stack.Screen>
+              </Stack.Navigator>
+            )}
           </Drawer.Screen>
           <Drawer.Screen
             name="About"

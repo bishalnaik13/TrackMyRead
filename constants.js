@@ -36,7 +36,11 @@ export const STORAGE_KEYS = {
   BOOKS: '@books',
   THEME: '@theme',
   SCHEMA_VERSION: '@schema_version',
+  COLLECTIONS: '@collections',
+  READING_GOAL: '@reading_goal',
 };
+
+export const MAX_COLLECTION_NAME_LENGTH = 30;
 
 export const DEFAULT_BOOK = {
   favorite: false,
