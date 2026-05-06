@@ -234,10 +234,11 @@ function HomeScreen({ navigation }) {
             <Ionicons name={item.favorite ? 'heart' : 'heart-outline'} size={22} color={item.favorite ? colors.accent : colors.tint} />
           </TouchableOpacity>
         </TouchableOpacity>
-      );
-    }
+      </SwipeableRow>
+    );
+  }
 
-    {collections.length > 0 && (
+  {collections.length > 0 && (
         <View style={{ paddingHorizontal: 12, marginBottom: 8 }}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <TouchableOpacity
