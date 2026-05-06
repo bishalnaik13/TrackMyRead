@@ -21,6 +21,15 @@ export default function StatsScreen({ navigation }) {
     const read = books.filter(b => b.status === BOOK_STATUS.READ).length;
     const favorites = books.filter(b => b.favorite).length;
 
+    const ratedBooks = books.filter(b => b.rating);
+    const avgRating = ratedBooks.length > 0
+      ? (ratedBooks.reduce((sum, b) => sum + b.rating, 0) / ratedBooks.length).toFixed(1)
+      : null;
+    const topRated = books
+      .filter(b => b.rating)
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 3);
+
     const now = new Date();
     const thisYear = now.getFullYear();
     const thisMonth = now.getMonth();
@@ -64,6 +73,8 @@ export default function StatsScreen({ navigation }) {
       booksReadThisYear,
       recentBooks,
       monthlyData,
+      avgRating,
+      topRated,
     };
   }, [books]);
 
@@ -105,6 +116,14 @@ export default function StatsScreen({ navigation }) {
               {stats.favorites}
             </Text>
             <Text style={{ color: colors.tint }}>Favorites</Text>
+          </View>
+
+          <View style={[styles.card, { width: '48%', marginBottom: 12 }]}>
+            <Ionicons name="star" size={32} color="#FFD700" />
+            <Text style={{ fontSize: 28, fontWeight: '700', color: colors.text, marginTop: 8 }}>
+              {stats.avgRating || '-'}
+            </Text>
+            <Text style={{ color: colors.tint }}>Avg Rating</Text>
           </View>
         </View>
 
@@ -149,6 +168,45 @@ export default function StatsScreen({ navigation }) {
                 </View>
               ))}
             </View>
+          </View>
+)}
+        </View>
+        )}
+
+        {stats.topRated.length > 0 && (
+          <View style={{ marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.neutral }}>
+            <Text style={{ fontSize: 18, fontWeight: '600', color: colors.text, marginBottom: 12 }}>
+              Top Rated Books
+            </Text>
+            {stats.topRated.map((book, index) => (
+              <View
+                key={book.id}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingVertical: 8,
+                  borderBottomWidth: 1,
+                  borderBottomColor: colors.neutral,
+                }}
+              >
+                <View style={{ width: 30, alignItems: 'center' }}>
+                  <View style={{ flexDirection: 'row' }}>
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <Ionicons
+                        key={star}
+                        name={star <= book.rating ? 'star' : 'star-outline'}
+                        size={12}
+                        color={star <= book.rating ? '#FFD700' : colors.tint}
+                      />
+                    ))}
+                  </View>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>{book.title}</Text>
+                  <Text style={{ fontSize: 12, color: colors.tint }}>{book.author || 'Unknown'}</Text>
+                </View>
+              </View>
+            ))}
           </View>
         )}
 

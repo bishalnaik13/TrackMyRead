@@ -34,6 +34,10 @@ export function BooksProvider({ children }) {
       favorite: false,
       status: BOOK_STATUS.TO_READ,
       notes: '',
+      rating: null,
+      currentPage: null,
+      totalPages: null,
+      collections: [],
       createdAt: Date.now(),
     };
     setBooks(prev => [newBook, ...prev]);
@@ -184,6 +188,24 @@ export function BooksProvider({ children }) {
     );
   }, []);
 
+  const setRating = useCallback((id, rating) => {
+    if (rating === null || (rating >= 1 && rating <= 5)) {
+      setBooks(prev =>
+        prev.map(book =>
+          book.id === id ? { ...book, rating } : book
+        )
+      );
+    }
+  }, []);
+
+  const setProgress = useCallback((id, currentPage, totalPages) => {
+    setBooks(prev =>
+      prev.map(book =>
+        book.id === id ? { ...book, currentPage, totalPages } : book
+      )
+    );
+  }, []);
+
   const getBookById = useCallback((id) => {
     return books.find(b => b.id === id) || null;
   }, [books]);
@@ -214,6 +236,10 @@ export function BooksProvider({ children }) {
         return sorted.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
       case 'status':
         return sorted.sort((a, b) => (a.status || '').localeCompare(b.status || ''));
+      case 'rating_high':
+        return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      case 'rating_low':
+        return sorted.sort((a, b) => (a.rating || 0) - (b.rating || 0));
       default:
         return sorted;
     }
@@ -233,6 +259,8 @@ export function BooksProvider({ children }) {
     undoDelete,
     toggleFavorite,
     setStatus,
+    setRating,
+    setProgress,
     getBookById,
     getFavorites,
     searchBooks,

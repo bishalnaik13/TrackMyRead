@@ -10,6 +10,8 @@ export const SORT_OPTIONS = {
   DATE_NEWEST: 'date_newest',
   DATE_OLDEST: 'date_oldest',
   STATUS: 'status',
+  RATING_HIGH: 'rating_high',
+  RATING_LOW: 'rating_low',
 };
 
 export const FILTER_OPTIONS = {
@@ -41,6 +43,10 @@ export const DEFAULT_BOOK = {
   status: BOOK_STATUS.TO_READ,
   notes: '',
   author: '',
+  rating: null,
+  currentPage: null,
+  totalPages: null,
+  collections: [],
 };
 
 export const SCHEMA_VERSION = 1;

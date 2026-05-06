@@ -210,6 +210,18 @@ function HomeScreen({ navigation }) {
           <View style={styles.cardRight}>
             <Text style={styles.cardTitle}>{item.title}</Text>
             <Text style={styles.cardMeta}>{item.author || 'Unknown author'}</Text>
+            {item.rating > 0 && (
+              <View style={{ flexDirection: 'row', marginTop: 4 }}>
+                {[1, 2, 3, 4, 5].map(star => (
+                  <Ionicons
+                    key={star}
+                    name={star <= item.rating ? 'star' : 'star-outline'}
+                    size={12}
+                    color={star <= item.rating ? '#FFD700' : colors.tint}
+                  />
+                ))}
+              </View>
+            )}
           </View>
           <TouchableOpacity
             onPress={() => toggleFavorite(item.id)}
@@ -277,6 +289,8 @@ function HomeScreen({ navigation }) {
                 { value: SORT_OPTIONS.TITLE_ASC, label: 'A-Z' },
                 { value: SORT_OPTIONS.TITLE_DESC, label: 'Z-A' },
                 { value: SORT_OPTIONS.STATUS, label: 'Status' },
+                { value: SORT_OPTIONS.RATING_HIGH, label: 'Rating ↑' },
+                { value: SORT_OPTIONS.RATING_LOW, label: 'Rating ↓' },
               ].map(opt => (
                 <TouchableOpacity
                   key={opt.value}
@@ -351,6 +365,18 @@ function HomeScreen({ navigation }) {
                   <View style={{ padding: 8 }}>
                     <Text style={{ fontSize: 12, fontWeight: '600', color: colors.text }} numberOfLines={2}>{item.title}</Text>
                     <Text style={{ fontSize: 10, color: colors.tint }} numberOfLines={1}>{item.author || 'Unknown'}</Text>
+                    {item.rating > 0 && (
+                      <View style={{ flexDirection: 'row', marginTop: 4 }}>
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <Ionicons
+                            key={star}
+                            name={star <= item.rating ? 'star' : 'star-outline'}
+                            size={10}
+                            color={star <= item.rating ? '#FFD700' : colors.tint}
+                          />
+                        ))}
+                      </View>
+                    )}
                   </View>
                 </TouchableOpacity>
               )}

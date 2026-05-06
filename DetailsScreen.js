@@ -12,7 +12,7 @@ import { navigationShape, routeShape } from './types';
 
 function DetailsScreen({ route, navigation }) {
   const { bookId } = route.params || {};
-  const { getBookById, updateBook, removeBook, toggleFavorite, setStatus, undoDelete, trash, fetchBookCover, fetchMultipleCovers, updateBookCover } = useBooks();
+  const { getBookById, updateBook, removeBook, toggleFavorite, setStatus, setRating, undoDelete, trash, fetchBookCover, fetchMultipleCovers, updateBookCover } = useBooks();
   const book = getBookById(bookId);
 
   const [editing, setEditing] = useState(false);
@@ -290,6 +290,31 @@ function DetailsScreen({ route, navigation }) {
                 >
                   <Text style={[styles.buttonText, { color: book.status === BOOK_STATUS.READ ? colors.buttonText : colors.text }]}>Read</Text>
                 </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={{ borderTopWidth: 1, borderColor: colors.neutral, marginTop: 16, paddingTop: 16 }}>
+              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 12 }}>
+                Rating: <Text style={{ color: colors.primary, fontWeight: 'normal' }}>
+                  {book.rating ? '★'.repeat(book.rating) + '☆'.repeat(5 - book.rating) : 'Not rated'}
+                </Text>
+              </Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                {[1, 2, 3, 4, 5].map(star => (
+                  <TouchableOpacity
+                    key={star}
+                    onPress={() => setRating(bookId, book.rating === star ? null : star)}
+                    accessibilityLabel={`Rate ${star} stars`}
+                    accessibilityRole="button"
+                    style={{ padding: 8 }}
+                  >
+                    <Ionicons
+                      name={book.rating >= star ? 'star' : 'star-outline'}
+                      size={32}
+                      color={book.rating >= star ? '#FFD700' : colors.tint}
+                    />
+                  </TouchableOpacity>
+                ))}
               </View>
             </View>
           </>
