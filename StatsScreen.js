@@ -170,8 +170,6 @@ export default function StatsScreen({ navigation }) {
             </View>
           </View>
 )}
-        </View>
-        )}
 
         {stats.topRated.length > 0 && (
           <View style={{ marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.neutral }}>
