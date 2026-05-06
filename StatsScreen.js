@@ -1,18 +1,48 @@
-import React, { useContext, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useContext, useMemo, useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { getStyles, getColors } from './styles';
 import { ThemeContext } from './ThemeContext';
 import { useBooks } from './BooksContext';
 import { BOOK_STATUS } from './constants';
+import { loadReadingGoal, saveReadingGoal } from './utils/storage';
 
 export default function StatsScreen({ navigation }) {
   const { theme } = useContext(ThemeContext);
   const { books, calculateProgress } = useBooks();
+  const [readingGoal, setReadingGoal] = useState(null);
+  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [goalInput, setGoalInput] = useState('');
 
   const styles = getStyles(theme);
   const colors = getColors(theme);
+
+  useEffect(() => {
+    (async () => {
+      const goal = await loadReadingGoal();
+      setReadingGoal(goal);
+    })();
+  }, []);
+
+  const handleSaveGoal = async () => {
+    const goalNum = parseInt(goalInput, 10);
+    if (isNaN(goalNum) || goalNum <= 0) {
+      Alert.alert('Invalid Goal', 'Please enter a valid number');
+      return;
+    }
+    await saveReadingGoal(goalNum);
+    setReadingGoal(goalNum);
+    setShowGoalModal(false);
+    setGoalInput('');
+  };
+
+  const handleDeleteGoal = async () => {
+    await saveReadingGoal(null);
+    setReadingGoal(null);
+    setShowGoalModal(false);
+    setGoalInput('');
+  };
 
   const stats = useMemo(() => {
     const totalBooks = books.length;
@@ -97,6 +127,50 @@ export default function StatsScreen({ navigation }) {
         <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: 20 }}>
           Reading Statistics
         </Text>
+
+        <View style={{ marginBottom: 20, padding: 16, backgroundColor: colors.card, borderRadius: 12 }}>
+          <Text style={{ fontSize: 18, fontWeight: '600', color: colors.text, marginBottom: 16, textAlign: 'center' }}>
+            Reading Goal {new Date().getFullYear()}
+          </Text>
+          
+          {readingGoal ? (
+            <View style={{ alignItems: 'center' }}>
+              <View style={{ 
+                width: 120, 
+                height: 120, 
+                borderRadius: 60, 
+                borderWidth: 10, 
+                borderColor: colors.primary,
+                alignItems: 'center', 
+                justifyContent: 'center',
+                backgroundColor: colors.background,
+              }}>
+                <Text style={{ fontSize: 28, fontWeight: '700', color: colors.text }}>
+                  {stats.booksReadThisYear}
+                </Text>
+                <Text style={{ fontSize: 14, color: colors.tint }}>of {readingGoal}</Text>
+              </View>
+              <Text style={{ color: colors.tint, marginTop: 12 }}>
+                {stats.booksReadThisYear >= readingGoal ? 'Goal achieved!' : `${readingGoal - stats.booksReadThisYear} books to go`}
+              </Text>
+              <TouchableOpacity
+                onPress={() => { setGoalInput(readingGoal.toString()); setShowGoalModal(true); }}
+                style={{ marginTop: 12 }}
+              >
+                <Text style={{ color: colors.primary, fontSize: 14 }}>Edit Goal</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity
+              onPress={() => { setGoalInput(''); setShowGoalModal(true); }}
+              style={{ alignItems: 'center', padding: 16 }}
+            >
+              <Ionicons name="target" size={48} color={colors.primary} />
+              <Text style={{ color: colors.text, marginTop: 12, fontSize: 16 }}>Set a reading goal for the year</Text>
+              <Text style={{ color: colors.tint, marginTop: 4, fontSize: 12 }}>Track your progress as you read</Text>
+            </TouchableOpacity>
+          )}
+        </View>
 
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
           <View style={[styles.card, { width: '48%', marginBottom: 12 }]}>
@@ -292,6 +366,57 @@ export default function StatsScreen({ navigation }) {
           </View>
         )}
       </ScrollView>
+
+      <Modal visible={showGoalModal} transparent animationType="fade" onRequestClose={() => setShowGoalModal(false)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 }}>
+          <View style={{ backgroundColor: colors.card, borderRadius: 12, padding: 20 }}>
+            <Text style={{ fontSize: 20, fontWeight: '600', color: colors.text, marginBottom: 16 }}>
+              {readingGoal ? 'Edit Reading Goal' : 'Set Reading Goal'}
+            </Text>
+            <Text style={{ color: colors.tint, marginBottom: 16 }}>
+              How many books do you want to read this year?
+            </Text>
+            <TextInput
+              value={goalInput}
+              onChangeText={setGoalInput}
+              keyboardType="numeric"
+              placeholder="Enter number of books"
+              placeholderTextColor={colors.tint}
+              style={{ 
+                borderWidth: 1, 
+                borderColor: colors.neutral, 
+                borderRadius: 8, 
+                padding: 12, 
+                fontSize: 18, 
+                color: colors.text,
+                backgroundColor: colors.background,
+              }}
+            />
+            <View style={{ flexDirection: 'row', marginTop: 20, justifyContent: 'space-between' }}>
+              <TouchableOpacity
+                onPress={() => setShowGoalModal(false)}
+                style={{ paddingVertical: 12, paddingHorizontal: 20 }}
+              >
+                <Text style={{ color: colors.tint }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleSaveGoal}
+                style={{ backgroundColor: colors.primary, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 8 }}
+              >
+                <Text style={{ color: colors.buttonText, fontWeight: '600' }}>Save</Text>
+              </TouchableOpacity>
+            </View>
+            {readingGoal && (
+              <TouchableOpacity
+                onPress={handleDeleteGoal}
+                style={{ alignItems: 'center', marginTop: 16 }}
+              >
+                <Text style={{ color: colors.destructive }}>Remove Goal</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

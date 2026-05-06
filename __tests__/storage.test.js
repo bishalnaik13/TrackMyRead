@@ -58,6 +58,28 @@ describe('Storage Utils', () => {
       const result = await saveBooks('not an array');
       expect(result).toBe(false);
     });
+
+    it('preserves all fields including rating, currentPage, totalPages, collections', async () => {
+      const testBooks = [
+        { 
+          id: '1', 
+          title: 'Test Book', 
+          favorite: false, 
+          status: 'Reading',
+          rating: 4,
+          currentPage: 50,
+          totalPages: 200,
+          collections: ['collection1', 'collection2'],
+        },
+      ];
+      await saveBooks(testBooks);
+      const stored = await AsyncStorage.getItem('@books');
+      const parsed = JSON.parse(stored);
+      expect(parsed[0].rating).toBe(4);
+      expect(parsed[0].currentPage).toBe(50);
+      expect(parsed[0].totalPages).toBe(200);
+      expect(parsed[0].collections).toEqual(['collection1', 'collection2']);
+    });
   });
 
   describe('loadTheme', () => {

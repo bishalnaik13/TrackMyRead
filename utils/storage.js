@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const BOOKS_KEY = '@books';
 const THEME_KEY = '@theme';
 const SCHEMA_VERSION_KEY = '@schema_version';
+const READING_GOAL_KEY = '@reading_goal';
 
 const CURRENT_SCHEMA_VERSION = 2;
 
@@ -69,6 +70,30 @@ export async function saveTheme(theme) {
     return true;
   } catch (error) {
     console.error('Error saving theme:', error);
+    return false;
+  }
+}
+
+export async function loadReadingGoal() {
+  try {
+    const goal = await AsyncStorage.getItem(READING_GOAL_KEY);
+    return goal ? parseInt(goal, 10) : null;
+  } catch (error) {
+    console.error('Error loading reading goal:', error);
+    return null;
+  }
+}
+
+export async function saveReadingGoal(goal) {
+  try {
+    if (goal === null) {
+      await AsyncStorage.removeItem(READING_GOAL_KEY);
+    } else {
+      await AsyncStorage.setItem(READING_GOAL_KEY, goal.toString());
+    }
+    return true;
+  } catch (error) {
+    console.error('Error saving reading goal:', error);
     return false;
   }
 }
