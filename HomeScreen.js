@@ -209,28 +209,47 @@ function HomeScreen({ navigation }) {
               <View style={styles.coverPlaceholder}>
                 <Ionicons name="book" size={28} color="#fff" />
               </View>
-)}
-
+            )}
+          </View>
           <View style={styles.cardRight}>
             <Text style={styles.cardTitle}>{item.title}</Text>
             <Text style={styles.cardMeta}>{item.author || 'Unknown author'}</Text>
             {item.rating > 0 && (
               <View style={{ flexDirection: 'row', marginTop: 4 }}>
                 {[1, 2, 3, 4, 5].map(star => (
-                  <Ionicons key={star} name={star <= item.rating ? 'star' : 'star-outline'} size={12} color={star <= item.rating ? '#FFD700' : colors.tint} />
+                  <Ionicons
+                    key={star}
+                    name={star <= item.rating ? 'star' : 'star-outline'}
+                    size={12}
+                    color={star <= item.rating ? '#FFD700' : colors.tint}
+                  />
                 ))}
               </View>
             )}
             {item.status === BOOK_STATUS.READING && item.currentPage && item.totalPages && (
               <View style={{ marginTop: 6 }}>
                 <View style={{ height: 4, backgroundColor: colors.neutral, borderRadius: 2 }}>
-                  <View style={{ height: 4, width: `${calculateProgress(item.currentPage, item.totalPages)}%`, backgroundColor: colors.primary, borderRadius: 2 }} />
+                  <View
+                    style={{
+                      height: 4,
+                      width: `${calculateProgress(item.currentPage, item.totalPages)}%`,
+                      backgroundColor: colors.primary,
+                      borderRadius: 2,
+                    }}
+                  />
                 </View>
-                <Text style={{ fontSize: 10, color: colors.tint, marginTop: 2 }}>{item.currentPage}/{item.totalPages} pages</Text>
+                <Text style={{ fontSize: 10, color: colors.tint, marginTop: 2 }}>
+                  {item.currentPage}/{item.totalPages} pages
+                </Text>
               </View>
             )}
           </View>
-          <TouchableOpacity onPress={() => toggleFavorite(item.id)} style={{ padding: 8 }} accessibilityLabel={item.favorite ? `Remove ${item.title} from favorites` : `Add ${item.title} to favorites`} accessibilityRole="button">
+          <TouchableOpacity
+            onPress={() => toggleFavorite(item.id)}
+            style={{ padding: 8 }}
+            accessibilityLabel={item.favorite ? `Remove ${item.title} from favorites` : `Add ${item.title} to favorites`}
+            accessibilityRole="button"
+          >
             <Ionicons name={item.favorite ? 'heart' : 'heart-outline'} size={22} color={item.favorite ? colors.accent : colors.tint} />
           </TouchableOpacity>
         </TouchableOpacity>
@@ -238,21 +257,102 @@ function HomeScreen({ navigation }) {
     );
   }
 
-  {collections.length > 0 && (
+  return (
+    <SafeAreaView edges={["left", "right"]} style={styles.screen}>
+      <View style={[styles.searchWrapper, { margin: 12 }]}>
+        <TextInput
+          placeholder="Search by title or author"
+          placeholderTextColor={colors.tint}
+          value={query}
+          onChangeText={setQuery}
+          style={styles.searchInput}
+          accessibilityLabel="Search books by title or author"
+          accessibilityHint="Enter book title or author name to search"
+        />
+      </View>
+
+      <View style={{ flexDirection: 'row', paddingHorizontal: 12, marginBottom: 8 }}>
+        <TouchableOpacity
+          onPress={() => setShowSortFilter(!showSortFilter)}
+          style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 6, paddingHorizontal: 10, backgroundColor: colors.card, borderRadius: 6 }}
+          accessibilityLabel="Sort and filter options"
+          accessibilityRole="button"
+        >
+          <Ionicons name="options" size={16} color={colors.text} />
+          <Text style={{ color: colors.text, marginLeft: 6, fontSize: 14 }}>Sort/Filter</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
+          style={{ marginLeft: 8, paddingVertical: 6, paddingHorizontal: 10, backgroundColor: colors.card, borderRadius: 6 }}
+          accessibilityLabel={`Switch to ${viewMode === 'list' ? 'grid' : 'list'} view`}
+          accessibilityRole="button"
+        >
+          <Ionicons name={viewMode === 'list' ? 'grid-outline' : 'list-outline'} size={16} color={colors.text} />
+        </TouchableOpacity>
+        {(filterBy !== FILTER_OPTIONS.ALL || sortBy !== SORT_OPTIONS.DATE_NEWEST) && (
+          <TouchableOpacity
+            onPress={() => { setFilterBy(FILTER_OPTIONS.ALL); setSortBy(SORT_OPTIONS.DATE_NEWEST); }}
+            style={{ marginLeft: 8, paddingVertical: 6, paddingHorizontal: 10 }}
+          >
+            <Text style={{ color: colors.destructive, fontSize: 14 }}>Clear</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {showSortFilter && (
+        <View style={{ paddingHorizontal: 12, paddingBottom: 12 }}>
+          <View style={{ marginBottom: 8 }}>
+            <Text style={{ color: colors.tint, fontSize: 12, marginBottom: 4 }}>Sort by:</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {[
+                { value: SORT_OPTIONS.DATE_NEWEST, label: 'Newest' },
+                { value: SORT_OPTIONS.DATE_OLDEST, label: 'Oldest' },
+                { value: SORT_OPTIONS.TITLE_ASC, label: 'A-Z' },
+                { value: SORT_OPTIONS.TITLE_DESC, label: 'Z-A' },
+                { value: SORT_OPTIONS.STATUS, label: 'Status' },
+                { value: SORT_OPTIONS.RATING_HIGH, label: 'Rating ↑' },
+                { value: SORT_OPTIONS.RATING_LOW, label: 'Rating ↓' },
+              ].map(opt => (
+                <TouchableOpacity
+                  key={opt.value}
+                  onPress={() => setSortBy(opt.value)}
+                  style={{ paddingVertical: 6, paddingHorizontal: 12, marginRight: 8, marginBottom: 4, borderRadius: 16, backgroundColor: sortBy === opt.value ? colors.primary : colors.card }}
+                >
+                  <Text style={{ color: sortBy === opt.value ? colors.buttonText : colors.text, fontSize: 12 }}>{opt.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+          <View>
+            <Text style={{ color: colors.tint, fontSize: 12, marginBottom: 4 }}>Filter by status:</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {[
+                { value: FILTER_OPTIONS.ALL, label: 'All' },
+                { value: FILTER_OPTIONS.TO_READ, label: 'To Read' },
+                { value: FILTER_OPTIONS.READING, label: 'Reading' },
+                { value: FILTER_OPTIONS.READ, label: 'Read' },
+              ].map(opt => (
+                <TouchableOpacity
+                  key={opt.value}
+                  onPress={() => setFilterBy(opt.value)}
+                  style={{ paddingVertical: 6, paddingHorizontal: 12, marginRight: 8, marginBottom: 4, borderRadius: 16, backgroundColor: filterBy === opt.value ? colors.primary : colors.card }}
+                >
+                  <Text style={{ color: filterBy === opt.value ? colors.buttonText : colors.text, fontSize: 12 }}>{opt.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+      )}
+
+      {collections.length > 0 && (
         <View style={{ paddingHorizontal: 12, marginBottom: 8 }}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity
-              onPress={() => setCollectionFilter(null)}
-              style={{ paddingVertical: 6, paddingHorizontal: 12, marginRight: 8, borderRadius: 16, backgroundColor: collectionFilter === null ? colors.primary : colors.card }}
-            >
+            <TouchableOpacity onPress={() => setCollectionFilter(null)} style={{ paddingVertical: 6, paddingHorizontal: 12, marginRight: 8, borderRadius: 16, backgroundColor: collectionFilter === null ? colors.primary : colors.card }}>
               <Text style={{ color: collectionFilter === null ? colors.buttonText : colors.text, fontSize: 12 }}>All</Text>
             </TouchableOpacity>
             {collections.map(collection => (
-              <TouchableOpacity
-                key={collection.id}
-                onPress={() => setCollectionFilter(collection.id)}
-                style={{ paddingVertical: 6, paddingHorizontal: 12, marginRight: 8, borderRadius: 16, backgroundColor: collectionFilter === collection.id ? colors.primary : colors.card }}
-              >
+              <TouchableOpacity key={collection.id} onPress={() => setCollectionFilter(collection.id)} style={{ paddingVertical: 6, paddingHorizontal: 12, marginRight: 8, borderRadius: 16, backgroundColor: collectionFilter === collection.id ? colors.primary : colors.card }}>
                 <Text style={{ color: collectionFilter === collection.id ? colors.buttonText : colors.text, fontSize: 12 }}>{collection.name}</Text>
               </TouchableOpacity>
             ))}
