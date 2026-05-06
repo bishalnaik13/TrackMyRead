@@ -211,7 +211,33 @@ function HomeScreen({ navigation }) {
               </View>
 )}
 
-      {collections.length > 0 && (
+          <View style={styles.cardRight}>
+            <Text style={styles.cardTitle}>{item.title}</Text>
+            <Text style={styles.cardMeta}>{item.author || 'Unknown author'}</Text>
+            {item.rating > 0 && (
+              <View style={{ flexDirection: 'row', marginTop: 4 }}>
+                {[1, 2, 3, 4, 5].map(star => (
+                  <Ionicons key={star} name={star <= item.rating ? 'star' : 'star-outline'} size={12} color={star <= item.rating ? '#FFD700' : colors.tint} />
+                ))}
+              </View>
+            )}
+            {item.status === BOOK_STATUS.READING && item.currentPage && item.totalPages && (
+              <View style={{ marginTop: 6 }}>
+                <View style={{ height: 4, backgroundColor: colors.neutral, borderRadius: 2 }}>
+                  <View style={{ height: 4, width: `${calculateProgress(item.currentPage, item.totalPages)}%`, backgroundColor: colors.primary, borderRadius: 2 }} />
+                </View>
+                <Text style={{ fontSize: 10, color: colors.tint, marginTop: 2 }}>{item.currentPage}/{item.totalPages} pages</Text>
+              </View>
+            )}
+          </View>
+          <TouchableOpacity onPress={() => toggleFavorite(item.id)} style={{ padding: 8 }} accessibilityLabel={item.favorite ? `Remove ${item.title} from favorites` : `Add ${item.title} to favorites`} accessibilityRole="button">
+            <Ionicons name={item.favorite ? 'heart' : 'heart-outline'} size={22} color={item.favorite ? colors.accent : colors.tint} />
+          </TouchableOpacity>
+        </TouchableOpacity>
+      );
+    }
+
+    {collections.length > 0 && (
         <View style={{ paddingHorizontal: 12, marginBottom: 8 }}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <TouchableOpacity
