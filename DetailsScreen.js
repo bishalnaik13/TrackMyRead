@@ -338,7 +338,7 @@ function DetailsScreen({ route, navigation }) {
               style={[styles.input, { flex: 1, marginRight: 8 }]}
               accessibilityLabel="Current page number"
             />
-            <Text style={{ color: colors.text }}> / </Text>
+            <Text style={{ color: colors.text }}>of</Text>
             <TextInput
               value={String(book.totalPages || '')}
               onChangeText={(text) => {
