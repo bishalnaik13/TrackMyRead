@@ -5,7 +5,7 @@ import {
   NAVIGATION_NAMES,
   STORAGE_KEYS,
   UI_CONFIG,
-} from '../constants';
+} from '../src/constants';
 
 describe('Constants', () => {
   describe('BOOK_STATUS', () => {

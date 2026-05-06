@@ -144,8 +144,3 @@ export function getColors(themeName = 'light') {
 }
 // export default styles;
 export { lightColors, darkColors };
-
-
-
-
-

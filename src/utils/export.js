@@ -1,5 +1,4 @@
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
+import { Share } from 'react-native';
 
 export const generateCSV = (books) => {
   const headers = ['Title', 'Author', 'Status', 'Rating', 'Current Page', 'Total Pages', 'Favorite', 'Created'];
@@ -19,12 +18,9 @@ export const generateCSV = (books) => {
 export const writeAndShareCSV = async (books) => {
   try {
     const csv = generateCSV(books);
-    const filename = `trackmyread_library_${Date.now()}.csv`;
-    const path = FileSystem.cacheDirectory + filename;
-    await FileSystem.writeAsStringAsync(path, csv);
-    await Sharing.shareAsync(path, {
-      mimeType: 'text/csv',
-      dialogTitle: 'Export Library',
+    await Share.share({
+      message: csv,
+      title: 'Export Library',
     });
     return true;
   } catch (error) {

@@ -2,12 +2,12 @@ import React, { useContext, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getStyles, getColors } from './styles';
-import { ThemeContext } from './ThemeContext';
-import { useBooks } from './BooksContext';
-import { SORT_OPTIONS } from './constants';
-import EmptyState from './components/EmptyState';
-import { BOOK_STATUS } from './constants';
+import { getStyles, getColors } from '../styles';
+import { ThemeContext } from '../context/ThemeContext';
+import { useBooks } from '../context/BooksContext';
+import { SORT_OPTIONS } from '../constants';
+import EmptyState from '../components/EmptyState';
+import { BOOK_STATUS } from '../constants';
 
 function CollectionDetailScreen({ route, navigation }) {
   const { collectionId } = route.params;

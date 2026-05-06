@@ -1,13 +1,11 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, Switch, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, Switch, TouchableOpacity, Alert, ActivityIndicator, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
-import { getStyles, getColors } from './styles';
-import { ThemeContext } from './ThemeContext';
-import { useBooks } from './BooksContext';
-import { exportBooks, validateImportData, mergeBooks } from './utils/storage';
-import { writeAndShareCSV } from './utils/export';
+import { getStyles, getColors } from '../styles';
+import { ThemeContext } from '../context/ThemeContext';
+import { useBooks } from '../context/BooksContext';
+import { exportBooks, validateImportData, mergeBooks } from '../utils/storage';
+import { writeAndShareCSV } from '../utils/export';
 
 export default function SettingsScreen() {
   const { theme, setTheme } = useContext(ThemeContext);
@@ -22,11 +20,9 @@ export default function SettingsScreen() {
     setExporting(true);
     try {
       const jsonData = await exportBooks(books);
-      const fileUri = FileSystem.documentDirectory + 'trackmyread_backup.json';
-      await FileSystem.writeAsStringAsync(fileUri, jsonData);
-      await Sharing.shareAsync(fileUri, {
-        mimeType: 'application/json',
-        dialogTitle: 'Export Book Library',
+      await Share.share({
+        message: jsonData,
+        title: 'Export Book Library',
       });
     } catch (error) {
       Alert.alert('Error', 'Failed to export library: ' + error.message);
@@ -61,36 +57,7 @@ export default function SettingsScreen() {
 
   async function doImport(mode) {
     setImporting(true);
-    try {
-      const fileUri = FileSystem.documentDirectory + 'trackmyread_backup.json';
-      const exists = await FileSystem.getInfoAsync(fileUri);
-      
-      if (!exists.exists) {
-        const files = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory);
-        const backupFile = files.find(f => f.endsWith('.json'));
-        
-        if (!backupFile) {
-          Alert.alert('Error', 'No backup file found. Please share a JSON file first.');
-          setImporting(false);
-          return;
-        }
-      }
-
-      const content = await FileSystem.readAsStringAsync(fileUri);
-      const validation = validateImportData(content);
-
-      if (!validation.valid) {
-        Alert.alert('Error', validation.error);
-        setImporting(false);
-        return;
-      }
-
-      const mergedBooks = mergeBooks(books, validation.books, mode);
-      setBooks(mergedBooks);
-      Alert.alert('Success', `Imported ${validation.books.length} books (${mode} mode)`);
-    } catch (error) {
-      Alert.alert('Error', 'Failed to import library. Make sure you have a valid backup file.');
-    }
+    Alert.alert('Info', 'JSON import is temporarily unavailable. Please use CSV export for now.');
     setImporting(false);
   }
 

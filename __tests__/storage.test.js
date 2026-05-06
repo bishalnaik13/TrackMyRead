@@ -6,7 +6,7 @@ import {
   validateImportData,
   mergeBooks,
   exportBooks,
-} from '../utils/storage';
+} from '../src/utils/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 describe('Storage Utils', () => {

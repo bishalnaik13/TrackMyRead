@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import uuid from 'react-native-uuid';
-import { initializeStorage, saveBooks, loadCollections, saveCollections } from './utils/storage';
-import { BOOK_STATUS } from './constants';
+import { initializeStorage, saveBooks, loadCollections, saveCollections } from '../utils/storage';
+import { BOOK_STATUS } from '../constants';
 
 export const calculateProgress = (currentPage, totalPages) => {
   if (!currentPage || !totalPages || totalPages === 0) return 0;

@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, Linking, Modal, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getStyles, getColors } from './styles';
-import { ThemeContext } from './ThemeContext';
+import { getStyles, getColors } from '../styles';
+import { ThemeContext } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 
-const { version } = require('./package.json');
+const { version } = require('../../package.json');
 
 export default function AboutScreen() {
   const { theme } = React.useContext(ThemeContext);
@@ -32,7 +32,7 @@ export default function AboutScreen() {
           <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
       <View style={{ alignItems: 'center', marginBottom: 16 }}>
         <Image
-          source={require('./assets/logo.png')}
+          source={require('../../assets/logo.png')}
           style={{ width: 120, height: 120, borderRadius: 12 }}
           resizeMode="contain"
         />

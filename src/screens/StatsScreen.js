@@ -2,11 +2,11 @@ import React, { useContext, useMemo, useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getStyles, getColors } from './styles';
-import { ThemeContext } from './ThemeContext';
-import { useBooks } from './BooksContext';
-import { BOOK_STATUS } from './constants';
-import { loadReadingGoal, saveReadingGoal } from './utils/storage';
+import { getStyles, getColors } from '../styles';
+import { ThemeContext } from '../context/ThemeContext';
+import { useBooks } from '../context/BooksContext';
+import { BOOK_STATUS } from '../constants';
+import { loadReadingGoal, saveReadingGoal } from '../utils/storage';
 
 export default function StatsScreen({ navigation }) {
   const { theme } = useContext(ThemeContext);
@@ -165,7 +165,7 @@ export default function StatsScreen({ navigation }) {
               onPress={() => { setGoalInput(''); setShowGoalModal(true); }}
               style={{ alignItems: 'center', padding: 16 }}
             >
-              <Ionicons name="target" size={48} color={colors.primary} />
+              <Ionicons name="flag" size={48} color={colors.primary} />
               <Text style={{ color: colors.text, marginTop: 12, fontSize: 16 }}>Set a reading goal for the year</Text>
               <Text style={{ color: colors.tint, marginTop: 4, fontSize: 12 }}>Track your progress as you read</Text>
             </TouchableOpacity>
@@ -264,7 +264,7 @@ export default function StatsScreen({ navigation }) {
               ))}
             </View>
           </View>
-)}
+        )}
 
         {stats.topRated.length > 0 && (
           <View style={{ marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.neutral }}>

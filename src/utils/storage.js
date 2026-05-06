@@ -8,6 +8,22 @@ const COLLECTIONS_KEY = '@collections';
 
 const CURRENT_SCHEMA_VERSION = 2;
 
+export async function clearAllData() {
+  try {
+    await AsyncStorage.multiRemove([
+      BOOKS_KEY,
+      THEME_KEY,
+      SCHEMA_VERSION_KEY,
+      READING_GOAL_KEY,
+      COLLECTIONS_KEY,
+    ]);
+    return true;
+  } catch (error) {
+    console.error('Error clearing data:', error);
+    return false;
+  }
+}
+
 function isValidBook(book) {
   return (
     book &&

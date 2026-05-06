@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, act, waitFor } from '@testing-library/react-native';
-import { BooksProvider, useBooks } from '../BooksContext';
-import { BOOK_STATUS, SORT_OPTIONS, FILTER_OPTIONS } from '../constants';
+import { BooksProvider, useBooks } from '../src/context/BooksContext';
+import { BOOK_STATUS, SORT_OPTIONS, FILTER_OPTIONS } from '../src/constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-jest.mock('../utils/storage', () => ({
+jest.mock('../src/utils/storage', () => ({
   initializeStorage: jest.fn().mockResolvedValue([]),
   saveBooks: jest.fn().mockResolvedValue(true),
 }));

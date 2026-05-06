@@ -2,7 +2,7 @@ import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text } from 'react-native';
+import { View, Text, AsyncStorage } from 'react-native';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -10,20 +10,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { TouchableOpacity } from 'react-native';
 
-import HomeScreen from './HomeScreen';
-import DetailsScreen from './DetailsScreen';
-import FavoritesScreen from './FavoritesScreen';
-import SettingsScreen from './SettingsScreen';
-import AboutScreen from './AboutScreen';
-import StatsScreen from './StatsScreen';
-import CollectionsScreen from './CollectionsScreen';
-import CollectionDetailScreen from './CollectionDetailScreen';
-import Snackbar from './components/Snackbar';
+import HomeScreen from './src/screens/HomeScreen';
+import DetailsScreen from './src/screens/DetailsScreen';
+import FavoritesScreen from './src/screens/FavoritesScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
+import AboutScreen from './src/screens/AboutScreen';
+import StatsScreen from './src/screens/StatsScreen';
+import CollectionsScreen from './src/screens/CollectionsScreen';
+import CollectionDetailScreen from './src/screens/CollectionDetailScreen';
+import Snackbar from './src/components/Snackbar';
 
-import { ThemeContext } from './ThemeContext';
-import { BooksProvider, useBooks } from './BooksContext';
-import { lightColors, darkColors } from './styles';
-import { loadTheme, saveTheme } from './utils/storage';
+import { ThemeContext } from './src/context/ThemeContext';
+import { BooksProvider, useBooks } from './src/context/BooksContext';
+import { lightColors, darkColors } from './src/styles';
+import { loadTheme, saveTheme, clearAllData } from './src/utils/storage';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -110,6 +110,16 @@ function MainApp() {
     saveTheme(theme);
   }, [theme]);
 
+  useEffect(() => {
+    (async () => {
+      const hasMigrated = await AsyncStorage.getItem('@restructure_migrated');
+      if (!hasMigrated) {
+        await clearAllData();
+        await AsyncStorage.setItem('@restructure_migrated', 'true');
+      }
+    })();
+  }, []);
+
   const palette = theme === 'dark' ? darkColors : lightColors;
   const navTheme = {
     ...((theme === 'dark') ? DarkTheme : DefaultTheme),
@@ -139,23 +149,33 @@ function MainApp() {
           <Drawer.Screen name="Main">
             {() => (
               <Tab.Navigator
-                screenOptions={({ route: navRoute }) => ({
+                screenOptions={{
                   headerShown: false,
                   headerTitleAlign: 'center',
                   tabBarActiveTintColor: navTheme.colors.primary,
                   tabBarInactiveTintColor: navTheme.colors.text,
                   tabBarStyle: { backgroundColor: navTheme.colors.card },
-                  tabBarIcon: ({ focused }) => (
-                    <TabIconWithBadge routeName={navRoute ? navRoute.name : 'Home'} focused={focused} favoritesCount={favoritesCount} />
-                  ),
-                })}
+                }}
               >
-                <Tab.Screen name="Home">
-                  {(props) => <HomeStack {...props} />}
-                </Tab.Screen>
-                <Tab.Screen name="Favorites" options={{ headerShown: true }}>
-                  {(props) => <FavoritesScreen {...props} />}
-                </Tab.Screen>
+                <Tab.Screen 
+                  name="Home"
+                  component={HomeStack}
+                  options={{
+                    tabBarIcon: ({ focused }) => (
+                      <TabIconWithBadge routeName="Home" focused={focused} favoritesCount={favoritesCount} />
+                    ),
+                  }}
+                />
+                <Tab.Screen 
+                  name="Favorites" 
+                  component={FavoritesScreen}
+                  options={{ 
+                    headerShown: true,
+                    tabBarIcon: ({ focused }) => (
+                      <TabIconWithBadge routeName="Favorites" focused={focused} favoritesCount={favoritesCount} />
+                    ),
+                  }}
+                />
               </Tab.Navigator>
             )}
           </Drawer.Screen>

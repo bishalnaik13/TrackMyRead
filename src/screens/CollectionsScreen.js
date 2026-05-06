@@ -2,11 +2,11 @@ import React, { useState, useContext } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getStyles, getColors } from './styles';
-import { ThemeContext } from './ThemeContext';
-import { useBooks } from './BooksContext';
-import { MAX_COLLECTION_NAME_LENGTH } from './constants';
-import EmptyState from './components/EmptyState';
+import { getStyles, getColors } from '../styles';
+import { ThemeContext } from '../context/ThemeContext';
+import { useBooks } from '../context/BooksContext';
+import { MAX_COLLECTION_NAME_LENGTH } from '../constants';
+import EmptyState from '../components/EmptyState';
 
 export default function CollectionsScreen({ navigation }) {
   const { theme } = useContext(ThemeContext);

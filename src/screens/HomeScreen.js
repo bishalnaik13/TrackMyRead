@@ -4,13 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import PropTypes from 'prop-types';
-import { getStyles, getColors } from './styles';
-import { ThemeContext } from './ThemeContext';
-import { useBooks } from './BooksContext';
-import { UI_CONFIG, SORT_OPTIONS, FILTER_OPTIONS, BOOK_STATUS } from './constants';
-import { navigationShape } from './types';
-import EmptyState from './components/EmptyState';
-import LoadingState from './components/LoadingState';
+import { getStyles, getColors } from '../styles';
+import { ThemeContext } from '../context/ThemeContext';
+import { useBooks } from '../context/BooksContext';
+import { UI_CONFIG, SORT_OPTIONS, FILTER_OPTIONS, BOOK_STATUS } from '../constants';
+import { navigationShape } from '../types';
+import EmptyState from '../components/EmptyState';
+import LoadingState from '../components/LoadingState';
 
 function HomeScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
