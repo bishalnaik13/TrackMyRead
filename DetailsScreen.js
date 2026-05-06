@@ -3,6 +3,8 @@ import { View, Text, TouchableOpacity, TextInput, Alert, ScrollView, Image, Acti
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system';
 import PropTypes from 'prop-types';
 import { getStyles, getColors } from './styles';
 import { ThemeContext } from './ThemeContext';
@@ -134,6 +136,21 @@ function DetailsScreen({ route, navigation }) {
     updateBookCover(bookId, '');
   }
 
+  async function handleShare() {
+    const shareText = `📚 ${book.title}\n✍️ ${book.author || 'Unknown Author'}\n📖 Status: ${book.status}\n⭐ Rating: ${book.rating ? '★'.repeat(book.rating) + '☆'.repeat(5 - book.rating) : 'Not rated'}\n\nShared from TrackMyRead app`;
+    try {
+      const filename = `trackmyread_${Date.now()}.txt`;
+      const path = FileSystem.cacheDirectory + filename;
+      await FileSystem.writeAsStringAsync(path, shareText);
+      await Sharing.shareAsync(path, {
+        mimeType: 'text/plain',
+        dialogTitle: `Share ${book.title}`,
+      });
+    } catch (error) {
+      Alert.alert('Error', 'Failed to share');
+    }
+  }
+
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.screen, { padding: 12 }]}>
       <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
@@ -180,14 +197,24 @@ function DetailsScreen({ route, navigation }) {
           )
         )}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text }}>{book.title}</Text>
-          <TouchableOpacity
-            onPress={handleToggleFavorite}
-            accessibilityLabel={book.favorite ? `Remove ${book.title} from favorites` : `Add ${book.title} to favorites`}
-            accessibilityRole="button"
-          >
-            <Ionicons name={book.favorite ? 'heart' : 'heart-outline'} size={24} color={book.favorite ? colors.accent : colors.tint} />
-          </TouchableOpacity>
+          <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text, flex: 1 }}>{book.title}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity
+              onPress={handleShare}
+              accessibilityLabel={`Share ${book.title}`}
+              accessibilityRole="button"
+              style={{ marginRight: 12 }}
+            >
+              <Ionicons name="share-outline" size={22} color={colors.tint} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleToggleFavorite}
+              accessibilityLabel={book.favorite ? `Remove ${book.title} from favorites` : `Add ${book.title} to favorites`}
+              accessibilityRole="button"
+            >
+              <Ionicons name={book.favorite ? 'heart' : 'heart-outline'} size={24} color={book.favorite ? colors.accent : colors.tint} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <Text style={{ color: colors.tint, marginTop: 8 }}>{book.author}</Text>

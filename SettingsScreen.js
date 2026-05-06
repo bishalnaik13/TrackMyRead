@@ -7,6 +7,7 @@ import { getStyles, getColors } from './styles';
 import { ThemeContext } from './ThemeContext';
 import { useBooks } from './BooksContext';
 import { exportBooks, validateImportData, mergeBooks } from './utils/storage';
+import { writeAndShareCSV } from './utils/export';
 
 export default function SettingsScreen() {
   const { theme, setTheme } = useContext(ThemeContext);
@@ -29,6 +30,19 @@ export default function SettingsScreen() {
       });
     } catch (error) {
       Alert.alert('Error', 'Failed to export library: ' + error.message);
+    }
+    setExporting(false);
+  }
+
+  async function handleCSVExport() {
+    setExporting(true);
+    try {
+      const success = await writeAndShareCSV(books);
+      if (!success) {
+        Alert.alert('Error', 'Failed to export library');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to export library');
     }
     setExporting(false);
   }
@@ -120,6 +134,16 @@ export default function SettingsScreen() {
           ) : (
             <Text style={{ color: colors.primary, fontSize: 15 }}>Export Library (JSON)</Text>
           )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={handleCSVExport}
+          disabled={exporting}
+          style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.neutral }}
+          accessibilityLabel="Export library as CSV"
+          accessibilityRole="button"
+        >
+          <Text style={{ color: colors.primary, fontSize: 15 }}>Export Library (CSV)</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
