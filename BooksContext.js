@@ -3,6 +3,11 @@ import uuid from 'react-native-uuid';
 import { initializeStorage, saveBooks } from './utils/storage';
 import { BOOK_STATUS } from './constants';
 
+export const calculateProgress = (currentPage, totalPages) => {
+  if (!currentPage || !totalPages || totalPages === 0) return 0;
+  return Math.min(100, Math.round((currentPage / totalPages) * 100));
+};
+
 const BooksContext = createContext(null);
 
 export function BooksProvider({ children }) {
@@ -261,6 +266,7 @@ export function BooksProvider({ children }) {
     setStatus,
     setRating,
     setProgress,
+    calculateProgress,
     getBookById,
     getFavorites,
     searchBooks,

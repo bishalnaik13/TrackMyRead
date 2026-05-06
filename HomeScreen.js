@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import { getStyles, getColors } from './styles';
 import { ThemeContext } from './ThemeContext';
 import { useBooks } from './BooksContext';
-import { UI_CONFIG, SORT_OPTIONS, FILTER_OPTIONS } from './constants';
+import { UI_CONFIG, SORT_OPTIONS, FILTER_OPTIONS, BOOK_STATUS } from './constants';
 import { navigationShape } from './types';
 import EmptyState from './components/EmptyState';
 import LoadingState from './components/LoadingState';
@@ -29,7 +29,7 @@ function HomeScreen({ navigation }) {
   const debounceTimeout = useRef(null);
 
   const { theme } = useContext(ThemeContext);
-  const { books, addBook, toggleFavorite, searchBooks, fetchBookCover, fetchMultipleCovers, sortBooks, filterBooks, removeBook } = useBooks();
+  const { books, addBook, toggleFavorite, searchBooks, fetchBookCover, fetchMultipleCovers, sortBooks, filterBooks, removeBook, calculateProgress } = useBooks();
 
   const styles = getStyles(theme);
   const colors = getColors(theme);
@@ -222,6 +222,23 @@ function HomeScreen({ navigation }) {
                 ))}
               </View>
             )}
+            {item.status === BOOK_STATUS.READING && item.currentPage && item.totalPages && (
+              <View style={{ marginTop: 6 }}>
+                <View style={{ height: 4, backgroundColor: colors.neutral, borderRadius: 2 }}>
+                  <View
+                    style={{
+                      height: 4,
+                      width: `${calculateProgress(item.currentPage, item.totalPages)}%`,
+                      backgroundColor: colors.primary,
+                      borderRadius: 2,
+                    }}
+                  />
+                </View>
+                <Text style={{ fontSize: 10, color: colors.tint, marginTop: 2 }}>
+                  {item.currentPage}/{item.totalPages} pages
+                </Text>
+              </View>
+            )}
           </View>
           <TouchableOpacity
             onPress={() => toggleFavorite(item.id)}
@@ -375,6 +392,20 @@ function HomeScreen({ navigation }) {
                             color={star <= item.rating ? '#FFD700' : colors.tint}
                           />
                         ))}
+                      </View>
+                    )}
+                    {item.status === BOOK_STATUS.READING && item.currentPage && item.totalPages && (
+                      <View style={{ marginTop: 4 }}>
+                        <View style={{ height: 3, backgroundColor: colors.neutral, borderRadius: 1.5 }}>
+                          <View
+                            style={{
+                              height: 3,
+                              width: `${calculateProgress(item.currentPage, item.totalPages)}%`,
+                              backgroundColor: colors.primary,
+                              borderRadius: 1.5,
+                            }}
+                          />
+                        </View>
                       </View>
                     )}
                   </View>

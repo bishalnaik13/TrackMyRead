@@ -9,7 +9,7 @@ import { BOOK_STATUS } from './constants';
 
 export default function StatsScreen({ navigation }) {
   const { theme } = useContext(ThemeContext);
-  const { books } = useBooks();
+  const { books, calculateProgress } = useBooks();
 
   const styles = getStyles(theme);
   const colors = getColors(theme);
@@ -29,6 +29,17 @@ export default function StatsScreen({ navigation }) {
       .filter(b => b.rating)
       .sort((a, b) => b.rating - a.rating)
       .slice(0, 3);
+
+    const pagesRead = books.reduce((sum, b) => {
+      if (b.currentPage && (b.status === BOOK_STATUS.READING || b.status === BOOK_STATUS.READ)) {
+        return sum + b.currentPage;
+      }
+      return sum;
+    }, 0);
+
+    const currentlyReading = books.filter(
+      b => b.status === BOOK_STATUS.READING && b.currentPage && b.totalPages
+    );
 
     const now = new Date();
     const thisYear = now.getFullYear();
@@ -75,6 +86,8 @@ export default function StatsScreen({ navigation }) {
       monthlyData,
       avgRating,
       topRated,
+      pagesRead,
+      currentlyReading,
     };
   }, [books]);
 
@@ -124,6 +137,14 @@ export default function StatsScreen({ navigation }) {
               {stats.avgRating || '-'}
             </Text>
             <Text style={{ color: colors.tint }}>Avg Rating</Text>
+          </View>
+
+          <View style={[styles.card, { width: '48%', marginBottom: 12 }]}>
+            <Ionicons name="document-text" size={32} color={colors.primary} />
+            <Text style={{ fontSize: 28, fontWeight: '700', color: colors.text, marginTop: 8 }}>
+              {stats.pagesRead}
+            </Text>
+            <Text style={{ color: colors.tint }}>Pages Read</Text>
           </View>
         </View>
 
@@ -203,6 +224,32 @@ export default function StatsScreen({ navigation }) {
                   <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>{book.title}</Text>
                   <Text style={{ fontSize: 12, color: colors.tint }}>{book.author || 'Unknown'}</Text>
                 </View>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {stats.currentlyReading.length > 0 && (
+          <View style={{ marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.neutral }}>
+            <Text style={{ fontSize: 18, fontWeight: '600', color: colors.text, marginBottom: 12 }}>
+              Currently Reading
+            </Text>
+            {stats.currentlyReading.map(book => (
+              <View key={book.id} style={{ marginBottom: 16 }}>
+                <Text style={{ color: colors.text, fontSize: 14, fontWeight: '600' }}>{book.title}</Text>
+                <View style={{ height: 6, backgroundColor: colors.neutral, borderRadius: 3, marginTop: 6 }}>
+                  <View
+                    style={{
+                      height: 6,
+                      width: `${calculateProgress(book.currentPage, book.totalPages)}%`,
+                      backgroundColor: colors.primary,
+                      borderRadius: 3,
+                    }}
+                  />
+                </View>
+                <Text style={{ color: colors.tint, fontSize: 12, marginTop: 4 }}>
+                  {book.currentPage} / {book.totalPages} pages ({calculateProgress(book.currentPage, book.totalPages)}%)
+                </Text>
               </View>
             ))}
           </View>

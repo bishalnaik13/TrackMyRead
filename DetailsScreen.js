@@ -12,7 +12,7 @@ import { navigationShape, routeShape } from './types';
 
 function DetailsScreen({ route, navigation }) {
   const { bookId } = route.params || {};
-  const { getBookById, updateBook, removeBook, toggleFavorite, setStatus, setRating, undoDelete, trash, fetchBookCover, fetchMultipleCovers, updateBookCover } = useBooks();
+  const { getBookById, updateBook, removeBook, toggleFavorite, setStatus, setRating, setProgress, calculateProgress, undoDelete, trash, fetchBookCover, fetchMultipleCovers, updateBookCover } = useBooks();
   const book = getBookById(bookId);
 
   const [editing, setEditing] = useState(false);
@@ -319,6 +319,54 @@ function DetailsScreen({ route, navigation }) {
             </View>
           </>
         )}
+
+      {book.status === BOOK_STATUS.READING && (
+        <View style={{ borderTopWidth: 1, borderColor: colors.neutral, marginTop: 16, paddingTop: 16 }}>
+          <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 12 }}>
+            Reading Progress
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TextInput
+              value={String(book.currentPage || '')}
+              onChangeText={(text) => {
+                const page = parseInt(text) || 0;
+                setProgress(bookId, page, book.totalPages);
+              }}
+              keyboardType="numeric"
+              placeholder="Current"
+              placeholderTextColor={colors.tint}
+              style={[styles.input, { flex: 1, marginRight: 8 }]}
+              accessibilityLabel="Current page number"
+            />
+            <Text style={{ color: colors.text }}> / </Text>
+            <TextInput
+              value={String(book.totalPages || '')}
+              onChangeText={(text) => {
+                const total = parseInt(text) || 0;
+                setProgress(bookId, book.currentPage, total);
+              }}
+              keyboardType="numeric"
+              placeholder="Total"
+              placeholderTextColor={colors.tint}
+              style={[styles.input, { flex: 1, marginLeft: 8 }]}
+              accessibilityLabel="Total pages"
+            />
+          </View>
+          <View style={{ height: 8, backgroundColor: colors.neutral, borderRadius: 4, marginTop: 12 }}>
+            <View
+              style={{
+                height: 8,
+                width: `${calculateProgress(book.currentPage, book.totalPages)}%`,
+                backgroundColor: colors.primary,
+                borderRadius: 4,
+              }}
+            />
+          </View>
+          <Text style={{ color: colors.tint, marginTop: 4, textAlign: 'center' }}>
+            {calculateProgress(book.currentPage, book.totalPages)}% complete
+          </Text>
+        </View>
+      )}
       </ScrollView>
 
       <Modal visible={showCoverPicker} transparent animationType="fade" onRequestClose={() => setShowCoverPicker(false)}>
