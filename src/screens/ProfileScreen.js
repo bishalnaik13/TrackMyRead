@@ -50,7 +50,7 @@ export default function ProfileScreen({ navigation }) {
     <SafeAreaView edges={["top", "left", "right"]} style={styles.screen}>
       <LinearGradient colors={getGlassTokens(theme).screenGradient} style={StyleSheet.absoluteFill} />
       <View style={{ flex: 1, padding: 16 }}>
-        <Text style={{ fontSize: 28, fontWeight: '700', color: colors.text, marginBottom: 24 }}>
+        <Text style={{ fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: 24 }}>
           Profile
         </Text>
 

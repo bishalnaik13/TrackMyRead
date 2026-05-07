@@ -72,10 +72,12 @@ export const UI_CONFIG = {
   DEBOUNCE_DELAY: 300,
   UNDO_TIMEOUT: 5000,
   FONT_SIZES: {
-    SMALL: 12,
-    MEDIUM: 14,
-    LARGE: 16,
-    XLARGE: 20,
-    XXLARGE: 22,
+    TINY:    10,
+    SMALL:   12,
+    MEDIUM:  14,
+    LARGE:   17,
+    XLARGE:  22,
+    XXLARGE: 28,
+    DISPLAY: 34,
   },
 };

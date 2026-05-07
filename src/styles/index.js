@@ -93,8 +93,8 @@ function makeStyles(themeName = 'light') {
     },
 
     empty: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-    emptyTitle: { fontSize: 20, fontWeight: '600', marginBottom: 6, color: colors.text },
-    emptySubtitle: { color: colors.tint },
+    emptyTitle: { fontSize: 22, fontWeight: '700', marginBottom: 6, color: colors.text, lineHeight: 28 },
+    emptySubtitle: { color: colors.tint, fontSize: 14, lineHeight: 20 },
 
     fab: {
       position: 'absolute',
@@ -185,10 +185,10 @@ function makeStyles(themeName = 'light') {
     coverPlaceholder: { width: 60, height: 90, backgroundColor: colors.primary, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
     coverImage: { width: 60, height: 90, borderRadius: 10 },
     cardRight: { flex: 1 },
-    cardTitle: { fontSize: 16, fontWeight: '600', marginBottom: 4, color: colors.text },
-    cardMeta: { color: colors.tint, fontSize: 13 },
-    cardMetaSmall: { color: colors.tint, marginTop: 4, fontSize: 12 },
-    cardNotes: { color: colors.text, marginTop: 10, fontSize: 14 },
+    cardTitle: { fontSize: 17, fontWeight: '600', marginBottom: 4, color: colors.text, lineHeight: 21 },
+    cardMeta: { color: colors.tint, fontSize: 14, lineHeight: 20, fontWeight: '400' },
+    cardMetaSmall: { color: colors.tint, marginTop: 4, fontSize: 12, lineHeight: 16, opacity: 0.7 },
+    cardNotes: { color: colors.text, marginTop: 10, fontSize: 14, lineHeight: 20 },
     swipeActions: {
       position: 'absolute',
       right: 0,

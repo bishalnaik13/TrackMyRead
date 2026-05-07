@@ -91,7 +91,7 @@ export default function DiscoverScreen({ navigation }) {
     <SafeAreaView edges={["top", "left", "right"]} style={styles.screen}>
       <LinearGradient colors={glassTokens.screenGradient} style={StyleSheet.absoluteFill} />
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <Text style={{ fontSize: 28, fontWeight: '700', color: colors.text, marginBottom: 16 }}>
+        <Text style={{ fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: 16 }}>
           Discover
         </Text>
 
