@@ -1,7 +1,8 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { getStyles, getColors, getGlassTokens } from '../styles';
 import { ThemeContext } from '../context/ThemeContext';
 import { useBooks } from '../context/BooksContext';
@@ -110,6 +111,7 @@ export default function ReadingNowScreen({ navigation }) {
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={styles.screen}>
+      <LinearGradient colors={glassTokens.screenGradient} style={StyleSheet.absoluteFill} />
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {streak > 0 && (
           <View style={{ 

@@ -1,7 +1,8 @@
 import React, { useContext, useMemo } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { getStyles, getColors, getGlassTokens } from '../styles';
 import { ThemeContext } from '../context/ThemeContext';
 import { useBooks } from '../context/BooksContext';
@@ -62,6 +63,7 @@ function CollectionDetailScreen({ route, navigation }) {
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={styles.screen}>
+      <LinearGradient colors={glassTokens.screenGradient} style={StyleSheet.absoluteFill} />
       <FlatList
         data={books}
         keyExtractor={item => item.id}

@@ -1,7 +1,8 @@
 import React, { useContext } from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import PropTypes from 'prop-types';
 import { getStyles, getColors, getGlassTokens } from '../styles';
 import { ThemeContext } from '../context/ThemeContext';
@@ -52,6 +53,7 @@ function FavoritesScreen({ navigation }) {
       edges={["top", "left", "right"]}
       style={styles.screen}
     >
+      <LinearGradient colors={glassTokens.screenGradient} style={StyleSheet.absoluteFill} />
       {favs.length === 0 ? (
         <EmptyState
           icon="heart-outline"

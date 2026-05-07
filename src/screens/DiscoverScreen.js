@@ -1,7 +1,8 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image, ScrollView, Alert, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { getStyles, getColors, getGlassTokens } from '../styles';
 import { ThemeContext } from '../context/ThemeContext';
 import { useBooks } from '../context/BooksContext';
@@ -88,6 +89,7 @@ export default function DiscoverScreen({ navigation }) {
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={styles.screen}>
+      <LinearGradient colors={glassTokens.screenGradient} style={StyleSheet.absoluteFill} />
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <Text style={{ fontSize: 28, fontWeight: '700', color: colors.text, marginBottom: 16 }}>
           Discover

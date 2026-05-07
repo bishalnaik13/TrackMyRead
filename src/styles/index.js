@@ -56,6 +56,7 @@ export function getGlassTokens(themeName = 'light') {
     chipBorder: 'rgba(255,255,255,0.10)',
     cardBg: 'rgba(38,38,40,0.80)',
     cardBorder: 'rgba(255,255,255,0.09)',
+    screenGradient: ['#0A0A0F', '#050508'],
   } : {
     tabBarBg: 'rgba(255,255,255,0.42)',
     tabBarTint: 'rgba(255,255,255,0.42)',
@@ -72,6 +73,7 @@ export function getGlassTokens(themeName = 'light') {
     chipBorder: 'rgba(255,255,255,0.25)',
     cardBg: 'rgba(255,255,255,0.82)',
     cardBorder: 'rgba(255,255,255,0.50)',
+    screenGradient: ['#F8F8FC', '#EDEDF2'],
   };
 }
 

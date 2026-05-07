@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Modal, TextInput, FlatList, KeyboardAvoid
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import PropTypes from 'prop-types';
 import { getStyles, getColors, getGlassTokens } from '../styles';
@@ -266,6 +267,7 @@ function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={styles.screen}>
+      <LinearGradient colors={glassTokens.screenGradient} style={StyleSheet.absoluteFill} />
       <View style={[
         styles.searchWrapper,
         {

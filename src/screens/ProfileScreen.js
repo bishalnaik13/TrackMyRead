@@ -1,8 +1,9 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, TextInput, Alert, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getStyles, getColors } from '../styles';
+import { LinearGradient } from 'expo-linear-gradient';
+import { getStyles, getColors, getGlassTokens } from '../styles';
 import { ThemeContext } from '../context/ThemeContext';
 import { useBooks } from '../context/BooksContext';
 import { loadReadingGoal, saveReadingGoal } from '../utils/storage';
@@ -45,6 +46,7 @@ export default function ProfileScreen({ navigation }) {
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={styles.screen}>
+      <LinearGradient colors={getGlassTokens(theme).screenGradient} style={StyleSheet.absoluteFill} />
       <View style={{ flex: 1, padding: 16 }}>
         <Text style={{ fontSize: 28, fontWeight: '700', color: colors.text, marginBottom: 24 }}>
           Profile

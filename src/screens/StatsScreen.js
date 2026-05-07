@@ -1,8 +1,9 @@
 import React, { useContext, useMemo, useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, Alert, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getStyles, getColors } from '../styles';
+import { LinearGradient } from 'expo-linear-gradient';
+import { getStyles, getColors, getGlassTokens } from '../styles';
 import { ThemeContext } from '../context/ThemeContext';
 import { useBooks } from '../context/BooksContext';
 import { BOOK_STATUS } from '../constants';
@@ -17,6 +18,7 @@ export default function StatsScreen({ navigation }) {
 
   const styles = getStyles(theme);
   const colors = getColors(theme);
+  const glassTokens = getGlassTokens(theme);
 
   useEffect(() => {
     (async () => {
@@ -123,6 +125,7 @@ export default function StatsScreen({ navigation }) {
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={styles.screen}>
+      <LinearGradient colors={glassTokens.screenGradient} style={StyleSheet.absoluteFill} />
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: 20 }}>
           Reading Statistics

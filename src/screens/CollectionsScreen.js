@@ -1,8 +1,9 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Modal, TextInput, Alert, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getStyles, getColors } from '../styles';
+import { LinearGradient } from 'expo-linear-gradient';
+import { getStyles, getColors, getGlassTokens } from '../styles';
 import { ThemeContext } from '../context/ThemeContext';
 import { useBooks } from '../context/BooksContext';
 import { MAX_COLLECTION_NAME_LENGTH } from '../constants';
@@ -18,6 +19,7 @@ export default function CollectionsScreen({ navigation }) {
 
   const styles = getStyles(theme);
   const colors = getColors(theme);
+  const glassTokens = getGlassTokens(theme);
 
   const handleCreate = () => {
     if (!newName.trim()) {
@@ -103,6 +105,7 @@ export default function CollectionsScreen({ navigation }) {
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={styles.screen}>
+      <LinearGradient colors={glassTokens.screenGradient} style={StyleSheet.absoluteFill} />
       <FlatList
         data={collections}
         keyExtractor={item => item.id}
