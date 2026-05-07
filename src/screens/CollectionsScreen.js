@@ -72,7 +72,7 @@ export default function CollectionsScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView edges={["left", "right"]} style={styles.screen}>
+    <SafeAreaView edges={["top", "left", "right"]} style={styles.screen}>
       <FlatList
         data={collections}
         keyExtractor={item => item.id}

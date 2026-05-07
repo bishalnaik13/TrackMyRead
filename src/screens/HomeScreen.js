@@ -258,7 +258,7 @@ function HomeScreen({ navigation }) {
   }
 
   return (
-    <SafeAreaView edges={["left", "right"]} style={styles.screen}>
+    <SafeAreaView edges={["top", "left", "right"]} style={styles.screen}>
       <View style={[styles.searchWrapper, { margin: 12 }]}>
         <TextInput
           placeholder="Search by title or author"

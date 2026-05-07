@@ -20,7 +20,7 @@ function FavoritesScreen({ navigation }) {
   function renderItem({ item }) {
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate('Home', { screen: 'Details', params: { bookId: item.id } })}
+        onPress={() => navigation.navigate('Library', { screen: 'Details', params: { bookId: item.id } })}
         style={styles.card}
         accessibilityLabel={`Favorite book: ${item.title} by ${item.author || 'unknown author'}`}
         accessibilityRole="button"
@@ -48,7 +48,7 @@ function FavoritesScreen({ navigation }) {
 
   return (
     <SafeAreaView
-      edges={["left", "right"]}
+      edges={["top", "left", "right"]}
       style={styles.screen}
     >
       {favs.length === 0 ? (

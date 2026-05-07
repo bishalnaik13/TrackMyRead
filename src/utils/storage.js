@@ -5,8 +5,9 @@ const THEME_KEY = '@theme';
 const SCHEMA_VERSION_KEY = '@schema_version';
 const READING_GOAL_KEY = '@reading_goal';
 const COLLECTIONS_KEY = '@collections';
+const ONBOARDING_KEY = '@onboarding_complete';
 
-const CURRENT_SCHEMA_VERSION = 2;
+const CURRENT_SCHEMA_VERSION = 3;
 
 export async function clearAllData() {
   try {
@@ -159,6 +160,14 @@ export async function runMigrations(books) {
     }));
   }
 
+  if (version < 3) {
+    console.log('Running migration v3: adding updatedAt field');
+    books = books.map(book => ({
+      ...book,
+      updatedAt: book.updatedAt || book.createdAt || Date.now(),
+    }));
+  }
+
   return books;
 }
 
@@ -237,6 +246,26 @@ export async function saveCollections(collections) {
     return true;
   } catch (error) {
     console.error('Error saving collections:', error);
+    return false;
+  }
+}
+
+export async function loadOnboardingComplete() {
+  try {
+    const value = await AsyncStorage.getItem(ONBOARDING_KEY);
+    return value === 'true';
+  } catch (error) {
+    console.error('Error loading onboarding status:', error);
+    return false;
+  }
+}
+
+export async function saveOnboardingComplete(complete = true) {
+  try {
+    await AsyncStorage.setItem(ONBOARDING_KEY, complete ? 'true' : 'false');
+    return true;
+  } catch (error) {
+    console.error('Error saving onboarding status:', error);
     return false;
   }
 }

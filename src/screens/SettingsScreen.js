@@ -63,7 +63,7 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView
-      edges={['left', 'right', 'bottom']}
+      edges={['top', 'left', 'right', 'bottom']}
       style={[
         styles.screen,
         { paddingHorizontal: 16, paddingTop: 8 }]}>

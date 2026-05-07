@@ -26,7 +26,7 @@ export default function AboutScreen() {
 
   return (
     <SafeAreaView
-      edges={['left', 'right', 'bottom']}
+      edges={['top', 'left', 'right', 'bottom']}
       style={[
         styles.screen, { padding: 16 }]}>
           <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>

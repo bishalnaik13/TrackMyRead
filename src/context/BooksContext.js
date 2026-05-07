@@ -40,6 +40,7 @@ export function BooksProvider({ children }) {
   }, [books, loading]);
 
   const addBook = useCallback((title, author = '', coverUrl = '') => {
+    const now = Date.now();
     const newBook = {
       id: uuid.v4(),
       title: title.trim(),
@@ -52,7 +53,8 @@ export function BooksProvider({ children }) {
       currentPage: null,
       totalPages: null,
       collections: [],
-      createdAt: Date.now(),
+      createdAt: now,
+      updatedAt: now,
     };
     setBooks(prev => [newBook, ...prev]);
     return newBook;
@@ -141,7 +143,7 @@ export function BooksProvider({ children }) {
   const updateBookCover = useCallback((id, coverUrl) => {
     setBooks(prev =>
       prev.map(book =>
-        book.id === id ? { ...book, coverUrl } : book
+        book.id === id ? { ...book, coverUrl, updatedAt: Date.now() } : book
       )
     );
   }, []);
@@ -149,7 +151,7 @@ export function BooksProvider({ children }) {
   const updateBook = useCallback((id, updates) => {
     setBooks(prev =>
       prev.map(book =>
-        book.id === id ? { ...book, ...updates } : book
+        book.id === id ? { ...book, ...updates, updatedAt: Date.now() } : book
       )
     );
   }, []);
@@ -189,7 +191,7 @@ export function BooksProvider({ children }) {
   const toggleFavorite = useCallback((id) => {
     setBooks(prev =>
       prev.map(book =>
-        book.id === id ? { ...book, favorite: !book.favorite } : book
+        book.id === id ? { ...book, favorite: !book.favorite, updatedAt: Date.now() } : book
       )
     );
   }, []);
@@ -197,7 +199,7 @@ export function BooksProvider({ children }) {
   const setStatus = useCallback((id, status) => {
     setBooks(prev =>
       prev.map(book =>
-        book.id === id ? { ...book, status } : book
+        book.id === id ? { ...book, status, updatedAt: Date.now() } : book
       )
     );
   }, []);
@@ -206,7 +208,7 @@ export function BooksProvider({ children }) {
     if (rating === null || (rating >= 1 && rating <= 5)) {
       setBooks(prev =>
         prev.map(book =>
-          book.id === id ? { ...book, rating } : book
+          book.id === id ? { ...book, rating, updatedAt: Date.now() } : book
         )
       );
     }
@@ -215,7 +217,7 @@ export function BooksProvider({ children }) {
   const setProgress = useCallback((id, currentPage, totalPages) => {
     setBooks(prev =>
       prev.map(book =>
-        book.id === id ? { ...book, currentPage, totalPages } : book
+        book.id === id ? { ...book, currentPage, totalPages, updatedAt: Date.now() } : book
       )
     );
   }, []);
@@ -320,6 +322,17 @@ export function BooksProvider({ children }) {
     return bookList.filter(b => b.status === filterBy);
   }, []);
 
+  const getRecentlyUpdated = useCallback((limit = 10) => {
+    return [...books]
+      .filter(b => b.updatedAt)
+      .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+      .slice(0, limit);
+  }, [books]);
+
+  const getBooksByStatus = useCallback((status) => {
+    return books.filter(b => b.status === status);
+  }, [books]);
+
   const value = {
     books,
     loading,
@@ -337,6 +350,8 @@ export function BooksProvider({ children }) {
     searchBooks,
     sortBooks,
     filterBooks,
+    getRecentlyUpdated,
+    getBooksByStatus,
     trash,
     fetchBookCover,
     fetchMultipleCovers,

@@ -30,6 +30,18 @@ export const NAVIGATION_NAMES = {
   HOME_LIST: 'HomeList',
   DETAILS: 'Details',
   MAIN: 'Main',
+  // New tab routes
+  LIBRARY: 'Library',
+  LIBRARY_STACK: 'LibraryStack',
+  READING: 'Reading',
+  READING_STACK: 'ReadingStack',
+  DISCOVER: 'Discover',
+  DISCOVER_STACK: 'DiscoverStack',
+  PROFILE: 'Profile',
+  PROFILE_STACK: 'ProfileStack',
+  COLLECTIONS: 'Collections',
+  STATS: 'Stats',
+  ONBOARDING: 'Onboarding',
 };
 
 export const STORAGE_KEYS = {
@@ -38,6 +50,7 @@ export const STORAGE_KEYS = {
   SCHEMA_VERSION: '@schema_version',
   COLLECTIONS: '@collections',
   READING_GOAL: '@reading_goal',
+  ONBOARDING: '@onboarding_complete',
 };
 
 export const MAX_COLLECTION_NAME_LENGTH = 30;

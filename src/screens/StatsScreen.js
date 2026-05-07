@@ -122,7 +122,7 @@ export default function StatsScreen({ navigation }) {
   }, [books]);
 
   return (
-    <SafeAreaView edges={["left", "right"]} style={styles.screen}>
+    <SafeAreaView edges={["top", "left", "right"]} style={styles.screen}>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: 20 }}>
           Reading Statistics

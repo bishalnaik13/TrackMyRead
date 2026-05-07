@@ -30,7 +30,7 @@ function CollectionDetailScreen({ route, navigation }) {
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => navigation.navigate('HomeStack', { screen: 'Details', params: { bookId: item.id } })}
+      onPress={() => navigation.navigate('Details', { bookId: item.id })}
       accessibilityLabel={`Book: ${item.title}`}
       accessibilityRole="button"
     >
@@ -60,7 +60,7 @@ function CollectionDetailScreen({ route, navigation }) {
   );
 
   return (
-    <SafeAreaView edges={["left", "right"]} style={styles.screen}>
+    <SafeAreaView edges={["top", "left", "right"]} style={styles.screen}>
       <FlatList
         data={books}
         keyExtractor={item => item.id}

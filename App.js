@@ -1,14 +1,11 @@
 import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import React, { useContext, useState, useEffect, useRef } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { View, Text, AsyncStorage } from 'react-native';
+import { StatusBar, View, Text, Image, AsyncStorage, TouchableOpacity } from 'react-native';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { TouchableOpacity } from 'react-native';
 
 import HomeScreen from './src/screens/HomeScreen';
 import DetailsScreen from './src/screens/DetailsScreen';
@@ -18,18 +15,21 @@ import AboutScreen from './src/screens/AboutScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import CollectionsScreen from './src/screens/CollectionsScreen';
 import CollectionDetailScreen from './src/screens/CollectionDetailScreen';
+import ReadingNowScreen from './src/screens/ReadingNowScreen';
+import DiscoverScreen from './src/screens/DiscoverScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
 import Snackbar from './src/components/Snackbar';
 
 import { ThemeContext } from './src/context/ThemeContext';
 import { BooksProvider, useBooks } from './src/context/BooksContext';
 import { lightColors, darkColors } from './src/styles';
-import { loadTheme, saveTheme, clearAllData } from './src/utils/storage';
+import { loadTheme, saveTheme, loadOnboardingComplete, saveOnboardingComplete } from './src/utils/storage';
+import { NAVIGATION_NAMES } from './src/constants';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
-const Drawer = createDrawerNavigator();
 
-function HomeStack({ navigation: parentNav }) {
+function LibraryStack({ navigation: parentNav }) {
   const { theme } = useContext(ThemeContext);
   const colors = theme === 'dark' ? darkColors : lightColors;
   return (
@@ -38,21 +38,83 @@ function HomeStack({ navigation: parentNav }) {
         headerStyle: { backgroundColor: colors.card },
         headerTintColor: colors.text,
         headerTitleAlign: 'center',
-        headerLeft: ({ tintColor }) => (
-          <TouchableOpacity
-            onPress={() => parentNav?.getParent()?.openDrawer()}
-            style={{ paddingLeft: 12 }}
-            accessibilityLabel="Open navigation menu"
-            accessibilityRole="button"
-          >
-            <Ionicons name="menu" size={24} color={colors.text} />
-          </TouchableOpacity>
-        )
-      }}>
-      <Stack.Screen name="HomeList" options={{ title: "My Books" }}>
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name={NAVIGATION_NAMES.LIBRARY}>
         {(props) => <HomeScreen {...props} />}
       </Stack.Screen>
-      <Stack.Screen name="Details" options={{ title: "Details" }}>
+      <Stack.Screen name={NAVIGATION_NAMES.DETAILS} options={{ headerShown: false }}>
+        {(props) => <DetailsScreen {...props} />}
+      </Stack.Screen>
+    </Stack.Navigator>
+  );
+}
+
+function CollectionsStack() {
+  const { theme } = useContext(ThemeContext);
+  const colors = theme === 'dark' ? darkColors : lightColors;
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: colors.card },
+        headerTintColor: colors.text,
+        headerTitleAlign: 'center',
+      }}
+    >
+      <Stack.Screen 
+        name="CollectionsList" 
+        component={CollectionsScreen}
+        options={{ title: 'Collections' }}
+      />
+      <Stack.Screen 
+        name="CollectionDetail" 
+        component={CollectionDetailScreen}
+        options={{ title: 'Collection' }}
+      />
+      <Stack.Screen name={NAVIGATION_NAMES.DETAILS} options={{ headerShown: false }}>
+        {(props) => <DetailsScreen {...props} />}
+      </Stack.Screen>
+    </Stack.Navigator>
+  );
+}
+
+function ProfileStack() {
+  const { theme } = useContext(ThemeContext);
+  const colors = theme === 'dark' ? darkColors : lightColors;
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: colors.card },
+        headerTintColor: colors.text,
+        headerTitleAlign: 'center',
+      }}
+    >
+      <Stack.Screen 
+        name="ProfileMain" 
+        component={ProfileScreen}
+        options={{ title: 'Profile', headerShown: false }}
+      />
+      <Stack.Screen 
+        name="Collections" 
+        component={CollectionsStack}
+      />
+      <Stack.Screen 
+        name="Stats" 
+        component={StatsScreen}
+        options={{ title: 'Statistics' }}
+      />
+      <Stack.Screen 
+        name="Settings" 
+        component={SettingsScreen}
+        options={{ title: 'Settings' }}
+      />
+      <Stack.Screen 
+        name="About" 
+        component={AboutScreen}
+        options={{ title: 'About' }}
+      />
+      <Stack.Screen name={NAVIGATION_NAMES.DETAILS} options={{ headerShown: false }}>
         {(props) => <DetailsScreen {...props} />}
       </Stack.Screen>
     </Stack.Navigator>
@@ -61,13 +123,15 @@ function HomeStack({ navigation: parentNav }) {
 
 function TabIconWithBadge({ routeName, focused, favoritesCount }) {
   const getIconName = () => {
-    if (routeName === 'Home') return focused ? 'home' : 'home-outline';
-    if (routeName === 'Favorites') return focused ? 'heart' : 'heart-outline';
+    if (routeName === 'Library') return focused ? 'library' : 'library-outline';
+    if (routeName === 'Reading') return focused ? 'book' : 'book-outline';
+    if (routeName === 'Discover') return focused ? 'compass' : 'compass-outline';
+    if (routeName === 'Profile') return focused ? 'person' : 'person-outline';
     return 'ellipse';
   };
 
   const iconName = getIconName();
-  const showBadge = routeName === 'Favorites' && favoritesCount > 0;
+  const showBadge = routeName === 'Library' && favoritesCount > 0;
 
   return (
     <View style={{ position: 'relative' }}>
@@ -94,10 +158,69 @@ function TabIconWithBadge({ routeName, focused, favoritesCount }) {
   );
 }
 
+function MainTabs() {
+  const { theme } = useContext(ThemeContext);
+  const { getFavorites } = useBooks();
+  const favoritesCount = getFavorites().length;
+  const palette = theme === 'dark' ? darkColors : lightColors;
+
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: palette.primary,
+        tabBarInactiveTintColor: palette.text,
+        tabBarStyle: { 
+          backgroundColor: palette.card,
+          borderTopColor: palette.neutral,
+        },
+      }}
+    >
+      <Tab.Screen 
+        name="Library"
+        component={LibraryStack}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIconWithBadge routeName="Library" focused={focused} favoritesCount={favoritesCount} />
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="Reading"
+        component={ReadingNowScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIconWithBadge routeName="Reading" focused={focused} favoritesCount={0} />
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="Discover"
+        component={DiscoverScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIconWithBadge routeName="Discover" focused={focused} favoritesCount={0} />
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="Profile"
+        component={ProfileStack}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIconWithBadge routeName="Profile" focused={focused} favoritesCount={0} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
 function MainApp() {
   const { theme, setTheme } = useContext(ThemeContext);
   const { trash, undoDelete, getFavorites } = useBooks();
   const favoritesCount = getFavorites().length;
+  const [onboardingComplete, setOnboardingComplete] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -112,13 +235,15 @@ function MainApp() {
 
   useEffect(() => {
     (async () => {
-      const hasMigrated = await AsyncStorage.getItem('@restructure_migrated');
-      if (!hasMigrated) {
-        await clearAllData();
-        await AsyncStorage.setItem('@restructure_migrated', 'true');
-      }
+      const completed = await loadOnboardingComplete();
+      setOnboardingComplete(completed);
     })();
   }, []);
+
+  const handleCompleteOnboarding = async () => {
+    await saveOnboardingComplete(true);
+    setOnboardingComplete(true);
+  };
 
   const palette = theme === 'dark' ? darkColors : lightColors;
   const navTheme = {
@@ -134,108 +259,24 @@ function MainApp() {
     },
   };
 
+  if (onboardingComplete === null) {
+    return null;
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <NavigationContainer theme={navTheme}>
-        <Drawer.Navigator
-          initialRouteName="Main"
-          screenOptions={{
-            headerShown: false,
-            drawerPosition: 'left',
-            drawerStyle: { width: '70%' },
-            overlayColor: 'rgba(0,0,0,0.35)',
-          }}
-        >
-          <Drawer.Screen name="Main">
-            {() => (
-              <Tab.Navigator
-                screenOptions={{
-                  headerShown: false,
-                  headerTitleAlign: 'center',
-                  tabBarActiveTintColor: navTheme.colors.primary,
-                  tabBarInactiveTintColor: navTheme.colors.text,
-                  tabBarStyle: { backgroundColor: navTheme.colors.card },
-                }}
-              >
-                <Tab.Screen 
-                  name="Home"
-                  component={HomeStack}
-                  options={{
-                    tabBarIcon: ({ focused }) => (
-                      <TabIconWithBadge routeName="Home" focused={focused} favoritesCount={favoritesCount} />
-                    ),
-                  }}
-                />
-                <Tab.Screen 
-                  name="Favorites" 
-                  component={FavoritesScreen}
-                  options={{ 
-                    headerShown: true,
-                    tabBarIcon: ({ focused }) => (
-                      <TabIconWithBadge routeName="Favorites" focused={focused} favoritesCount={favoritesCount} />
-                    ),
-                  }}
-                />
-              </Tab.Navigator>
-            )}
-          </Drawer.Screen>
-          <Drawer.Screen
-            name="Settings"
-            options={{
-              headerShown: true,
-              headerTitleAlign: 'center',
-              title: 'Settings',
-              headerStyle: { backgroundColor: palette.card },
-              headerTintColor: palette.text,
-            }}>
-            {(props) => <SettingsScreen {...props} />}
-          </Drawer.Screen>
-          <Drawer.Screen
-            name="Stats"
-            options={{
-              headerShown: true,
-              headerTitleAlign: 'center',
-              title: 'Statistics',
-              headerStyle: { backgroundColor: palette.card },
-              headerTintColor: palette.text,
-            }}>
-            {(props) => <StatsScreen {...props} />}
-          </Drawer.Screen>
-          <Drawer.Screen
-            name="Collections"
-            options={{
-              headerShown: true,
-              headerTitleAlign: 'center',
-              title: 'Collections',
-              headerStyle: { backgroundColor: palette.card },
-              headerTintColor: palette.text,
-            }}>
-            {() => (
-              <Stack.Navigator>
-                <Stack.Screen name="CollectionsList">
-                  {(props) => <CollectionsScreen {...props} />}
-                </Stack.Screen>
-                <Stack.Screen name="CollectionDetail">
-                  {(props) => <CollectionDetailScreen {...props} />}
-                </Stack.Screen>
-                <Stack.Screen name="Details">
-                  {(props) => <DetailsScreen {...props} />}
-                </Stack.Screen>
-              </Stack.Navigator>
-            )}
-          </Drawer.Screen>
-          <Drawer.Screen
-            name="About"
-            options={{
-              headerShown: true,
-              headerTitleAlign: 'center',
-              title: 'About',
-              headerStyle: { backgroundColor: palette.card },
-              headerTintColor: palette.text,
-            }}>
-            {(props) => <AboutScreen {...props} />}
-          </Drawer.Screen>
-        </Drawer.Navigator>
+        {!onboardingComplete ? (
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Onboarding">
+              {(props) => (
+                <OnboardingWrapper {...props} onComplete={handleCompleteOnboarding} />
+              )}
+            </Stack.Screen>
+          </Stack.Navigator>
+        ) : (
+          <MainTabs />
+        )}
       </NavigationContainer>
 
       <Snackbar
@@ -247,6 +288,134 @@ function MainApp() {
       />
 
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+    </View>
+  );
+}
+
+function OnboardingWrapper({ onComplete }) {
+  const { theme } = useContext(ThemeContext);
+  const colors = theme === 'dark' ? darkColors : lightColors;
+  const [step, setStep] = useState(0);
+  const [goal, setGoal] = useState('');
+  const { addBook } = useBooks();
+
+  const handleNext = () => {
+    if (step < 2) {
+      setStep(step + 1);
+    } else {
+      onComplete();
+    }
+  };
+
+  const handleSkip = () => {
+    onComplete();
+  };
+
+  const handleSetGoal = async () => {
+    const { saveReadingGoal } = require('./src/utils/storage');
+    const goalNum = parseInt(goal, 10);
+    if (!isNaN(goalNum) && goalNum > 0) {
+      await saveReadingGoal(goalNum);
+    }
+    handleNext();
+  };
+
+  const handleAddFirstBook = () => {
+    if (goal.trim()) {
+      addBook(goal.trim());
+    }
+    onComplete();
+  };
+
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
+      {step === 0 && (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 }}>
+          <Image
+            source={require('./assets/logo.png')}
+            style={{ width: 120, height: 120, borderRadius: 24, marginBottom: 32 }}
+            resizeMode="contain"
+          />
+          <Text style={{ fontSize: 28, fontWeight: '700', color: colors.text, marginBottom: 8, textAlign: 'center' }}>
+            Welcome to TrackMyRead
+          </Text>
+          <Text style={{ fontSize: 15, color: colors.tint, textAlign: 'center', marginBottom: 6 }}>
+            Your personal reading companion
+          </Text>
+          <Text style={{ fontSize: 13, color: colors.tint, textAlign: 'center', marginBottom: 40, lineHeight: 20 }}>
+            Track the books you're reading,{'\n'}discover new favorites, and achieve{'\n'}your reading goals
+          </Text>
+          <TouchableOpacity
+            style={{ 
+              backgroundColor: colors.primary, 
+              paddingVertical: 16, 
+              paddingHorizontal: 56, 
+              borderRadius: 12,
+              shadowColor: colors.primary,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 8,
+            }}
+            onPress={handleNext}
+          >
+            <Text style={{ color: colors.buttonText, fontSize: 18, fontWeight: '600' }}>
+              Get Started
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {step === 1 && (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 }}>
+          <Text style={{ fontSize: 24, fontWeight: '600', color: colors.text, marginBottom: 24, textAlign: 'center' }}>
+            What's your reading goal for this year?
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 40 }}>
+            <Text style={{ fontSize: 48, fontWeight: '700', color: colors.primary }}>12</Text>
+            <Text style={{ fontSize: 18, color: colors.tint, marginLeft: 8 }}>books</Text>
+          </View>
+          <View style={{ flexDirection: 'row' }}>
+            <TouchableOpacity 
+              style={{ paddingVertical: 14, paddingHorizontal: 24 }}
+              onPress={handleSkip}
+            >
+              <Text style={{ color: colors.primary, fontSize: 16 }}>Skip</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={{ backgroundColor: colors.primary, paddingVertical: 14, paddingHorizontal: 24, borderRadius: 10, marginLeft: 16 }}
+              onPress={handleSetGoal}
+            >
+              <Text style={{ color: colors.buttonText, fontSize: 16, fontWeight: '600' }}>Continue</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {step === 2 && (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 }}>
+          <Text style={{ fontSize: 24, fontWeight: '600', color: colors.text, marginBottom: 24, textAlign: 'center' }}>
+            Add your first book
+          </Text>
+          <Text style={{ fontSize: 14, color: colors.tint, marginBottom: 40, textAlign: 'center' }}>
+            Tap the + button to add books to your library
+          </Text>
+          <View style={{ flexDirection: 'row' }}>
+            <TouchableOpacity 
+              style={{ paddingVertical: 14, paddingHorizontal: 24 }}
+              onPress={handleSkip}
+            >
+              <Text style={{ color: colors.primary, fontSize: 16 }}>Skip</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={{ backgroundColor: colors.primary, paddingVertical: 14, paddingHorizontal: 24, borderRadius: 10, marginLeft: 16 }}
+              onPress={handleAddFirstBook}
+            >
+              <Text style={{ color: colors.buttonText, fontSize: 16, fontWeight: '600' }}>Add Book</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
