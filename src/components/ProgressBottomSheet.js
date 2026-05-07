@@ -1,12 +1,29 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Modal, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Modal, KeyboardAvoidingView, Platform, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function ProgressBottomSheet({ visible, book, onClose, onSave, calculateProgress, colors }) {
   const [currentPage, setCurrentPage] = useState(book?.currentPage?.toString() || '');
   const [totalPages, setTotalPages] = useState(book?.totalPages?.toString() || '');
+  const progressWidth = useRef(new Animated.Value(0)).current;
 
   if (!book) return null;
+
+  useEffect(() => {
+    if (visible && currentPage && totalPages) {
+      const progress = calculateProgress(
+        parseInt(currentPage, 10) || 0,
+        parseInt(totalPages, 10) || 0
+      );
+      Animated.timing(progressWidth, {
+        toValue: progress,
+        duration: 600,
+        useNativeDriver: false,
+      }).start();
+    } else {
+      progressWidth.setValue(0);
+    }
+  }, [visible, currentPage, totalPages]);
 
   const handleSave = () => {
     const current = parseInt(currentPage, 10) || 0;
@@ -93,10 +110,13 @@ export default function ProgressBottomSheet({ visible, book, onClose, onSave, ca
           {progress > 0 && (
             <View style={{ marginBottom: 20 }}>
               <View style={{ height: 8, backgroundColor: colors.neutral, borderRadius: 4, overflow: 'hidden' }}>
-                <View 
+                <Animated.View 
                   style={{ 
                     height: 8, 
-                    width: `${Math.min(100, progress)}%`, 
+                    width: progressWidth.interpolate({
+                      inputRange: [0, 100],
+                      outputRange: ['0%', '100%'],
+                    }),
                     backgroundColor: colors.primary, 
                     borderRadius: 4 
                   }} 

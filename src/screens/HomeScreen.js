@@ -14,6 +14,26 @@ import { navigationShape } from '../types';
 import EmptyState from '../components/EmptyState';
 import LoadingState from '../components/LoadingState';
 
+function AnimatedChip({ children, onPress }) {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const handlePress = () => {
+    Animated.sequence([
+      Animated.spring(scale, { toValue: 0.92, useNativeDriver: true, damping: 10, stiffness: 400 }),
+      Animated.spring(scale, { toValue: 1, useNativeDriver: true, damping: 10, stiffness: 400 }),
+    ]).start();
+    onPress();
+  };
+
+  return (
+    <TouchableOpacity onPress={handlePress}>
+      <Animated.View style={{ transform: [{ scale }] }}>
+        {children}
+      </Animated.View>
+    </TouchableOpacity>
+  );
+}
+
 function HomeScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [title, setTitle] = useState('');

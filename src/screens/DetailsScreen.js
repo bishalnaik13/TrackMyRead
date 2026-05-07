@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Alert, ScrollView, Image, ActivityIndicator, Modal, Share } from 'react-native';
+import React, { useState, useContext, useRef, useEffect } from 'react';
+import { View, Text, TouchableOpacity, TextInput, Alert, ScrollView, Image, ActivityIndicator, Modal, Share, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -23,6 +23,30 @@ function DetailsScreen({ route, navigation }) {
   const [showCoverPicker, setShowCoverPicker] = useState(false);
   const [showCollectionPicker, setShowCollectionPicker] = useState(false);
   const [fetchingCover, setFetchingCover] = useState(false);
+
+  const progressWidth = useRef(new Animated.Value(0)).current;
+  const starScales = useRef([new Animated.Value(1), new Animated.Value(1), new Animated.Value(1), new Animated.Value(1), new Animated.Value(1)]).current;
+
+  useEffect(() => {
+    if (book && book.status === BOOK_STATUS.READING && book.currentPage && book.totalPages) {
+      const progress = calculateProgress(book.currentPage, book.totalPages);
+      Animated.timing(progressWidth, {
+        toValue: progress,
+        duration: 600,
+        useNativeDriver: false,
+      }).start();
+    } else {
+      progressWidth.setValue(0);
+    }
+  }, [book?.currentPage, book?.totalPages, book?.status]);
+
+  const handleStarPress = (star) => {
+    Animated.sequence([
+      Animated.spring(starScales[star - 1], { toValue: 1.3, useNativeDriver: true, damping: 8, stiffness: 300 }),
+      Animated.spring(starScales[star - 1], { toValue: 1, useNativeDriver: true, damping: 8, stiffness: 300 }),
+    ]).start();
+    setRating(bookId, book.rating === star ? null : star);
+  };
 
   const { theme } = useContext(ThemeContext);
 
@@ -326,16 +350,18 @@ function DetailsScreen({ route, navigation }) {
                 {[1, 2, 3, 4, 5].map(star => (
                   <TouchableOpacity
                     key={star}
-                    onPress={() => setRating(bookId, book.rating === star ? null : star)}
+                    onPress={() => handleStarPress(star)}
                     accessibilityLabel={`Rate ${star} stars`}
                     accessibilityRole="button"
                     style={{ padding: 8 }}
                   >
-                    <Ionicons
-                      name={book.rating >= star ? 'star' : 'star-outline'}
-                      size={32}
-                      color={book.rating >= star ? '#FFD700' : colors.tint}
-                    />
+                    <Animated.View style={{ transform: [{ scale: starScales[star - 1] }] }}>
+                      <Ionicons
+                        name={book.rating >= star ? 'star' : 'star-outline'}
+                        size={32}
+                        color={book.rating >= star ? '#FFD700' : colors.tint}
+                      />
+                    </Animated.View>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -376,10 +402,13 @@ function DetailsScreen({ route, navigation }) {
             />
           </View>
           <View style={{ height: 8, backgroundColor: colors.neutral, borderRadius: 4, marginTop: 12 }}>
-            <View
+            <Animated.View
               style={{
                 height: 8,
-                width: `${calculateProgress(book.currentPage, book.totalPages)}%`,
+                width: progressWidth.interpolate({
+                  inputRange: [0, 100],
+                  outputRange: ['0%', '100%'],
+                }),
                 backgroundColor: colors.primary,
                 borderRadius: 4,
               }}

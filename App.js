@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import React, { useContext, useState, useEffect, useRef } from 'react';
-import { StatusBar, View, Text, Image, AsyncStorage, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import { StatusBar, View, Text, Image, AsyncStorage, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, StyleSheet, Animated } from 'react-native';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -107,6 +107,16 @@ function getGlassTokens(themeName = 'light') {
 function TabIconWithBadge({ routeName, focused, favoritesCount }) {
   const { theme } = useContext(ThemeContext);
   const colors = getColors(theme);
+  const scaleAnim = useRef(new Animated.Value(focused ? 1 : 0.85)).current;
+
+  useEffect(() => {
+    Animated.spring(scaleAnim, {
+      toValue: focused ? 1 : 0.85,
+      useNativeDriver: true,
+      damping: 12,
+      stiffness: 200,
+    }).start();
+  }, [focused]);
 
   const getIconName = () => {
     if (routeName === 'Library') return focused ? 'library' : 'library-outline';
@@ -121,7 +131,9 @@ function TabIconWithBadge({ routeName, focused, favoritesCount }) {
 
   return (
     <View style={{ position: 'relative' }}>
-      <Ionicons name={iconName} size={24} color={focused ? colors.primary : colors.tint} />
+      <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+        <Ionicons name={iconName} size={24} color={focused ? colors.primary : colors.tint} />
+      </Animated.View>
       {showBadge && (
         <View style={{
           position: 'absolute',
