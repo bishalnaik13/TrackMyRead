@@ -472,121 +472,128 @@ function HomeScreen({ navigation }) {
       </TouchableOpacity>
 
       <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.modalWrapper}>
-          <View style={styles.modal}>
-            <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Add Book</Text>
-                <TouchableOpacity
-                  onPress={() => { setModalVisible(false); resetForm(); }}
-                  accessibilityLabel="Close add book dialog"
-                  accessibilityRole="button"
-                >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }}>
+          <BlurView intensity={75} tint={theme === 'dark' ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.modalWrapper}>
+            <View style={styles.modal}>
+              <View style={{ width: 36, height: 5, backgroundColor: glassTokens.handleBar, borderRadius: 3, alignSelf: 'center', marginBottom: 16 }} />
+              <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Add Book</Text>
+                  <TouchableOpacity
+                    onPress={() => { setModalVisible(false); resetForm(); }}
+                    accessibilityLabel="Close add book dialog"
+                    accessibilityRole="button"
+                  >
+                    <Ionicons name="close" size={24} color={colors.tint} />
+                  </TouchableOpacity>
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Title *"
+                  placeholderTextColor={colors.tint}
+                  value={title}
+                  onChangeText={setTitle}
+                  accessibilityLabel="Book title input"
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Author"
+                  placeholderTextColor={colors.tint}
+                  value={author}
+                  onChangeText={setAuthor}
+                  accessibilityLabel="Author name input"
+                />
+                {coverUrl ? (
+                  <View style={{ alignItems: 'center', marginVertical: 10 }}>
+                    <Image source={{ uri: coverUrl }} style={{ width: 80, height: 120, borderRadius: 4 }} />
+                    <TouchableOpacity onPress={() => setCoverUrl('')} style={{ marginTop: 4 }}>
+                      <Text style={{ color: colors.destructive, fontSize: 12 }}>Remove cover</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <View style={{ marginTop: 8 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 8 }}>
+                      <TouchableOpacity
+                        style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, marginRight: 4, backgroundColor: colors.card, borderRadius: 8 }}
+                        onPress={handleSearchCover}
+                        disabled={fetchingCover}
+                        accessibilityLabel="Search for book cover"
+                        accessibilityRole="button"
+                      >
+                        {fetchingCover ? (
+                          <ActivityIndicator size="small" color={colors.primary} />
+                        ) : (
+                          <>
+                            <Ionicons name="search" size={16} color={colors.primary} style={{ marginRight: 6 }} />
+                            <Text style={{ color: colors.primary, fontSize: 13 }}>Search Google</Text>
+                          </>
+                        )}
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, marginLeft: 4, backgroundColor: colors.card, borderRadius: 8 }}
+                        onPress={handlePickFromGallery}
+                        accessibilityLabel="Pick cover from gallery"
+                        accessibilityRole="button"
+                      >
+                        <Ionicons name="images-outline" size={16} color={colors.primary} style={{ marginRight: 6 }} />
+                        <Text style={{ color: colors.primary, fontSize: 13 }}>From Gallery</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+                <View style={styles.row}>
+                  <TouchableOpacity
+                    style={styles.buttonPrimary}
+                    onPress={handleAddBook}
+                    accessibilityLabel="Save new book"
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.buttonText}>Save</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.buttonNeutral}
+                    onPress={() => { setModalVisible(false); resetForm(); }}
+                    accessibilityLabel="Cancel adding book"
+                    accessibilityRole="button"
+                  >
+                    <Text style={[styles.buttonText, { color: colors.text }]}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </View>
+          </KeyboardAvoidingView>
+          </View>
+        </Modal>
+
+      <Modal visible={showCoverPicker} transparent animationType="fade" onRequestClose={() => setShowCoverPicker(false)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }}>
+          <BlurView intensity={60} tint={theme === 'dark' ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+          <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
+            <View style={{ backgroundColor: glassTokens.modalBg, borderRadius: 16, padding: 16, maxHeight: '80%', borderWidth: 1, borderColor: glassTokens.modalBorder }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <Text style={{ fontSize: 18, fontWeight: '600', color: colors.text }}>Select Cover</Text>
+                <TouchableOpacity onPress={() => setShowCoverPicker(false)}>
                   <Ionicons name="close" size={24} color={colors.tint} />
                 </TouchableOpacity>
               </View>
-              <TextInput
-                style={styles.input}
-                placeholder="Title *"
-                placeholderTextColor={colors.tint}
-                value={title}
-                onChangeText={setTitle}
-                accessibilityLabel="Book title input"
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Author"
-                placeholderTextColor={colors.tint}
-                value={author}
-                onChangeText={setAuthor}
-                accessibilityLabel="Author name input"
-              />
-              {coverUrl ? (
-                <View style={{ alignItems: 'center', marginVertical: 10 }}>
-                  <Image source={{ uri: coverUrl }} style={{ width: 80, height: 120, borderRadius: 4 }} />
-                  <TouchableOpacity onPress={() => setCoverUrl('')} style={{ marginTop: 4 }}>
-                    <Text style={{ color: colors.destructive, fontSize: 12 }}>Remove cover</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View style={{ marginTop: 8 }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 8 }}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={{ flexDirection: 'row' }}>
+                  {coverOptions.map((cover, index) => (
                     <TouchableOpacity
-                      style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, marginRight: 4, backgroundColor: colors.card, borderRadius: 8 }}
-                      onPress={handleSearchCover}
-                      disabled={fetchingCover}
-                      accessibilityLabel="Search for book cover"
-                      accessibilityRole="button"
+                      key={index}
+                      onPress={() => handleSelectCover(cover.url)}
+                      style={{ marginRight: 12 }}
                     >
-                      {fetchingCover ? (
-                        <ActivityIndicator size="small" color={colors.primary} />
-                      ) : (
-                        <>
-                          <Ionicons name="search" size={16} color={colors.primary} style={{ marginRight: 6 }} />
-                          <Text style={{ color: colors.primary, fontSize: 13 }}>Search Google</Text>
-                        </>
-                      )}
+                      <Image source={{ uri: cover.url }} style={{ width: 100, height: 150, borderRadius: 8 }} />
+                      <Text style={{ color: colors.tint, fontSize: 10, marginTop: 4, textAlign: 'center' }} numberOfLines={1}>
+                        {cover.publishedDate ? cover.publishedDate.substring(0, 4) : 'Unknown'}
+                      </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                      style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, marginLeft: 4, backgroundColor: colors.card, borderRadius: 8 }}
-                      onPress={handlePickFromGallery}
-                      accessibilityLabel="Pick cover from gallery"
-                      accessibilityRole="button"
-                    >
-                      <Ionicons name="images-outline" size={16} color={colors.primary} style={{ marginRight: 6 }} />
-                      <Text style={{ color: colors.primary, fontSize: 13 }}>From Gallery</Text>
-                    </TouchableOpacity>
-                  </View>
+                  ))}
                 </View>
-              )}
-              <View style={styles.row}>
-                <TouchableOpacity
-                  style={styles.buttonPrimary}
-                  onPress={handleAddBook}
-                  accessibilityLabel="Save new book"
-                  accessibilityRole="button"
-                >
-                  <Text style={styles.buttonText}>Save</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.buttonNeutral}
-                  onPress={() => { setModalVisible(false); resetForm(); }}
-                  accessibilityLabel="Cancel adding book"
-                  accessibilityRole="button"
-                >
-                  <Text style={[styles.buttonText, { color: colors.text }]}>Cancel</Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
-
-      <Modal visible={showCoverPicker} transparent animationType="fade" onRequestClose={() => setShowCoverPicker(false)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: 20 }}>
-          <View style={{ backgroundColor: colors.card, borderRadius: 12, padding: 16, maxHeight: '80%' }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <Text style={{ fontSize: 18, fontWeight: '600', color: colors.text }}>Select Cover</Text>
-              <TouchableOpacity onPress={() => setShowCoverPicker(false)}>
-                <Ionicons name="close" size={24} color={colors.tint} />
-              </TouchableOpacity>
+              </ScrollView>
             </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View style={{ flexDirection: 'row' }}>
-                {coverOptions.map((cover, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    onPress={() => handleSelectCover(cover.url)}
-                    style={{ marginRight: 12 }}
-                  >
-                    <Image source={{ uri: cover.url }} style={{ width: 100, height: 150, borderRadius: 8 }} />
-                    <Text style={{ color: colors.tint, fontSize: 10, marginTop: 4, textAlign: 'center' }} numberOfLines={1}>
-                      {cover.publishedDate ? cover.publishedDate.substring(0, 4) : 'Unknown'}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </ScrollView>
           </View>
         </View>
       </Modal>

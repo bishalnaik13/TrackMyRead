@@ -57,6 +57,9 @@ export function getGlassTokens(themeName = 'light') {
     cardBg: 'rgba(38,38,40,0.80)',
     cardBorder: 'rgba(255,255,255,0.09)',
     screenGradient: ['#0A0A0F', '#050508'],
+    modalBg: 'rgba(28,28,30,0.88)',
+    modalBorder: 'rgba(255,255,255,0.12)',
+    handleBar: 'rgba(235,235,245,0.30)',
   } : {
     tabBarBg: 'rgba(255,255,255,0.42)',
     tabBarTint: 'rgba(255,255,255,0.42)',
@@ -74,6 +77,9 @@ export function getGlassTokens(themeName = 'light') {
     cardBg: 'rgba(255,255,255,0.82)',
     cardBorder: 'rgba(255,255,255,0.50)',
     screenGradient: ['#F8F8FC', '#EDEDF2'],
+    modalBg: 'rgba(242,242,247,0.85)',
+    modalBorder: 'rgba(255,255,255,0.40)',
+    handleBar: 'rgba(60,60,67,0.30)',
   };
 }
 
@@ -109,14 +115,16 @@ function makeStyles(themeName = 'light') {
 
     modalWrapper: { flex: 1, justifyContent: 'flex-end' },
     modal: {
-      backgroundColor: colors.card,
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
+      backgroundColor: themeName === 'dark' ? 'rgba(28,28,30,0.88)' : 'rgba(242,242,247,0.85)',
+      borderTopLeftRadius: 28,
+      borderTopRightRadius: 28,
       padding: 20,
       maxHeight: '85%',
+      borderTopWidth: 1,
+      borderTopColor: themeName === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.40)',
       shadowColor: '#000',
       shadowOffset: { width: 0, height: -4 },
-      shadowOpacity: 0.1,
+      shadowOpacity: 0.15,
       shadowRadius: 12,
       elevation: 8,
     },
@@ -125,12 +133,12 @@ function makeStyles(themeName = 'light') {
 
     input: {
       borderWidth: 1,
-      borderColor: colors.neutral,
+      borderColor: themeName === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.30)',
       borderRadius: 12,
       paddingHorizontal: 16,
       paddingVertical: 14,
       marginTop: 12,
-      backgroundColor: colors.placeholder,
+      backgroundColor: themeName === 'dark' ? 'rgba(40,40,40,0.65)' : 'rgba(255,255,255,0.72)',
       color: colors.text,
       fontSize: 16,
     },

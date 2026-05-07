@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, Modal, TextInput, Alert, StyleS
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { getStyles, getColors, getGlassTokens } from '../styles';
 import { ThemeContext } from '../context/ThemeContext';
 import { useBooks } from '../context/BooksContext';
@@ -137,48 +138,51 @@ export default function CollectionsScreen({ navigation }) {
       </TouchableOpacity>
 
       <Modal visible={showModal} transparent animationType="fade" onRequestClose={() => setShowModal(false)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 }}>
-          <View style={{ backgroundColor: colors.card, borderRadius: 12, padding: 20 }}>
-            <Text style={{ fontSize: 20, fontWeight: '600', color: colors.text, marginBottom: 16 }}>
-              {editingId ? 'Rename Collection' : 'New Collection'}
-            </Text>
-            <TextInput
-              value={editingId ? editName : newName}
-              onChangeText={editingId ? setEditName : setNewName}
-              placeholder="Collection name"
-              placeholderTextColor={colors.tint}
-              maxLength={MAX_COLLECTION_NAME_LENGTH}
-              style={{
-                borderWidth: 1,
-                borderColor: colors.neutral,
-                borderRadius: 8,
-                padding: 12,
-                color: colors.text,
-                backgroundColor: colors.background,
-              }}
-              autoFocus
-            />
-            <Text style={{ color: colors.tint, fontSize: 12, marginTop: 4, textAlign: 'right' }}>
-              {(editingId ? editName : newName).length}/{MAX_COLLECTION_NAME_LENGTH}
-            </Text>
-            <View style={{ flexDirection: 'row', marginTop: 20, justifyContent: 'space-between' }}>
-              <TouchableOpacity
-                onPress={() => { 
-                  setEditingId(null);
-                  setNewName(''); 
-                  setEditName('');
-                  setShowModal(false); 
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }}>
+          <BlurView intensity={60} tint={theme === 'dark' ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+          <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
+            <View style={{ backgroundColor: glassTokens.modalBg, borderRadius: 16, padding: 20, borderWidth: 1, borderColor: glassTokens.modalBorder }}>
+              <Text style={{ fontSize: 20, fontWeight: '600', color: colors.text, marginBottom: 16 }}>
+                {editingId ? 'Rename Collection' : 'New Collection'}
+              </Text>
+              <TextInput
+                value={editingId ? editName : newName}
+                onChangeText={editingId ? setEditName : setNewName}
+                placeholder="Collection name"
+                placeholderTextColor={colors.tint}
+                maxLength={MAX_COLLECTION_NAME_LENGTH}
+                style={{
+                  borderWidth: 1,
+                  borderColor: glassTokens.inputBorder,
+                  borderRadius: 12,
+                  padding: 12,
+                  color: colors.text,
+                  backgroundColor: glassTokens.inputBg,
                 }}
-                style={{ paddingVertical: 12, paddingHorizontal: 20 }}
-              >
-                <Text style={{ color: colors.tint }}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={editingId ? handleSaveRename : handleCreate}
-                style={{ backgroundColor: colors.primary, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 8 }}
-              >
-                <Text style={{ color: colors.buttonText, fontWeight: '600' }}>{editingId ? 'Save' : 'Create'}</Text>
-              </TouchableOpacity>
+                autoFocus
+              />
+              <Text style={{ color: colors.tint, fontSize: 12, marginTop: 4, textAlign: 'right' }}>
+                {(editingId ? editName : newName).length}/{MAX_COLLECTION_NAME_LENGTH}
+              </Text>
+              <View style={{ flexDirection: 'row', marginTop: 20, justifyContent: 'space-between' }}>
+                <TouchableOpacity
+                  onPress={() => { 
+                    setEditingId(null);
+                    setNewName(''); 
+                    setEditName('');
+                    setShowModal(false); 
+                  }}
+                  style={{ paddingVertical: 10, paddingHorizontal: 16, borderRadius: 20, backgroundColor: glassTokens.chipBg, borderWidth: 1, borderColor: glassTokens.chipBorder }}
+                >
+                  <Text style={{ color: colors.text }}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={editingId ? handleSaveRename : handleCreate}
+                  style={{ backgroundColor: colors.primary, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 8 }}
+                >
+                  <Text style={{ color: colors.buttonText, fontWeight: '600' }}>{editingId ? 'Save' : 'Create'}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>

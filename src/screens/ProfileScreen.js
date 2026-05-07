@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Modal, TextInput, Alert, StyleSheet } fro
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { getStyles, getColors, getGlassTokens } from '../styles';
 import { ThemeContext } from '../context/ThemeContext';
 import { useBooks } from '../context/BooksContext';
@@ -17,6 +18,7 @@ export default function ProfileScreen({ navigation }) {
   
   const styles = getStyles(theme);
   const colors = getColors(theme);
+  const glassTokens = getGlassTokens(theme);
   
   const streak = calculateStreak();
   const currentlyReading = getCurrentlyReading();
@@ -153,61 +155,65 @@ export default function ProfileScreen({ navigation }) {
       </View>
 
       <Modal visible={showGoalModal} transparent animationType="fade" onRequestClose={() => setShowGoalModal(false)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 }}>
-          <View style={{ backgroundColor: colors.card, borderRadius: 12, padding: 20 }}>
-            <Text style={{ fontSize: 20, fontWeight: '600', color: colors.text, marginBottom: 16 }}>
-              {readingGoal ? 'Edit Reading Goal' : 'Set Reading Goal'}
-            </Text>
-            <Text style={{ color: colors.tint, marginBottom: 16 }}>
-              How many books do you want to read this year?
-            </Text>
-            <TextInput
-              value={goalInput}
-              onChangeText={setGoalInput}
-              keyboardType="numeric"
-              placeholder="e.g., 24"
-              placeholderTextColor={colors.tint}
-              style={{
-                borderWidth: 1,
-                borderColor: colors.neutral,
-                borderRadius: 8,
-                padding: 12,
-                color: colors.text,
-                fontSize: 18,
-                marginBottom: 20,
-              }}
-              autoFocus
-            />
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              {readingGoal && (
-                <TouchableOpacity
-                  onPress={async () => {
-                    await saveReadingGoal(null);
-                    setReadingGoal(null);
-                    setShowGoalModal(false);
-                    setGoalInput('');
-                  }}
-                  style={{ paddingVertical: 12, paddingHorizontal: 16 }}
-                >
-                  <Text style={{ color: colors.destructive }}>Remove Goal</Text>
-                </TouchableOpacity>
-              )}
-              <View style={{ flexDirection: 'row', marginLeft: 'auto' }}>
-                <TouchableOpacity
-                  onPress={() => {
-                    setGoalInput('');
-                    setShowGoalModal(false);
-                  }}
-                  style={{ paddingVertical: 12, paddingHorizontal: 16 }}
-                >
-                  <Text style={{ color: colors.tint }}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={handleSaveGoal}
-                  style={{ backgroundColor: colors.primary, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 8, marginLeft: 8 }}
-                >
-                  <Text style={{ color: colors.buttonText, fontWeight: '600' }}>Save</Text>
-                </TouchableOpacity>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }}>
+          <BlurView intensity={60} tint={theme === 'dark' ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+          <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
+            <View style={{ backgroundColor: glassTokens.modalBg, borderRadius: 16, padding: 20, borderWidth: 1, borderColor: glassTokens.modalBorder }}>
+              <Text style={{ fontSize: 20, fontWeight: '600', color: colors.text, marginBottom: 16 }}>
+                {readingGoal ? 'Edit Reading Goal' : 'Set Reading Goal'}
+              </Text>
+              <Text style={{ color: colors.tint, marginBottom: 16 }}>
+                How many books do you want to read this year?
+              </Text>
+              <TextInput
+                value={goalInput}
+                onChangeText={setGoalInput}
+                keyboardType="numeric"
+                placeholder="e.g., 24"
+                placeholderTextColor={colors.tint}
+                style={{
+                  borderWidth: 1,
+                  borderColor: glassTokens.inputBorder,
+                  borderRadius: 12,
+                  padding: 12,
+                  color: colors.text,
+                  fontSize: 18,
+                  marginBottom: 20,
+                  backgroundColor: glassTokens.inputBg,
+                }}
+                autoFocus
+              />
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                {readingGoal && (
+                  <TouchableOpacity
+                    onPress={async () => {
+                      await saveReadingGoal(null);
+                      setReadingGoal(null);
+                      setShowGoalModal(false);
+                      setGoalInput('');
+                    }}
+                    style={{ paddingVertical: 12, paddingHorizontal: 16 }}
+                  >
+                    <Text style={{ color: colors.destructive }}>Remove Goal</Text>
+                  </TouchableOpacity>
+                )}
+                <View style={{ flexDirection: 'row', marginLeft: 'auto' }}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setGoalInput('');
+                      setShowGoalModal(false);
+                    }}
+                    style={{ paddingVertical: 12, paddingHorizontal: 16 }}
+                  >
+                    <Text style={{ color: colors.tint }}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleSaveGoal}
+                    style={{ backgroundColor: colors.primary, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 8, marginLeft: 8 }}
+                  >
+                    <Text style={{ color: colors.buttonText, fontWeight: '600' }}>Save</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </View>
