@@ -16,6 +16,7 @@ const lightColors = {
   dynamicAccent: '#5856D6',
   success: '#34C759',
   warning: '#FF9500',
+  gold: '#FFD700',
 };
 
 const darkColors = {
@@ -34,7 +35,45 @@ const darkColors = {
   dynamicAccent: '#5E5CE6',
   success: '#30D158',
   warning: '#FF9F0A',
+  gold: '#FFD700',
 };
+
+// Phase 19 - Glass tokens for tab bar
+export function getGlassTokens(themeName = 'light') {
+  return themeName === 'dark' ? {
+    tabBarBg: 'rgba(20,20,22,0.58)',
+    tabBarTint: 'rgba(20,20,22,0.58)',
+    tabBarBorder: 'rgba(255,255,255,0.10)',
+    tabBarGlow: 'rgba(10,132,255,0.35)',
+    tabBarGlowColor: 'rgba(10,132,255,0.42)',
+    tabActiveChip: 'rgba(255,255,255,0.08)',
+    activeCapsule: 'rgba(255,255,255,0.08)',
+    activeCapsuleBorder: 'rgba(255,255,255,0.10)',
+    inputBg: 'rgba(40,40,40,0.65)',
+    inputBorder: 'rgba(255,255,255,0.08)',
+    inputFocusGlow: 'rgba(10,132,255,0.20)',
+    chipBg: 'rgba(255,255,255,0.08)',
+    chipBorder: 'rgba(255,255,255,0.10)',
+    cardBg: 'rgba(38,38,40,0.80)',
+    cardBorder: 'rgba(255,255,255,0.09)',
+  } : {
+    tabBarBg: 'rgba(255,255,255,0.42)',
+    tabBarTint: 'rgba(255,255,255,0.42)',
+    tabBarBorder: 'rgba(255,255,255,0.55)',
+    tabBarGlow: 'rgba(0,122,255,0.22)',
+    tabBarGlowColor: 'rgba(0,122,255,0.28)',
+    tabActiveChip: 'rgba(0,122,255,0.12)',
+    activeCapsule: 'rgba(255,255,255,0.22)',
+    activeCapsuleBorder: 'rgba(255,255,255,0.35)',
+    inputBg: 'rgba(255,255,255,0.72)',
+    inputBorder: 'rgba(255,255,255,0.30)',
+    inputFocusGlow: 'rgba(0,122,255,0.15)',
+    chipBg: 'rgba(255,255,255,0.40)',
+    chipBorder: 'rgba(255,255,255,0.25)',
+    cardBg: 'rgba(255,255,255,0.82)',
+    cardBorder: 'rgba(255,255,255,0.50)',
+  };
+}
 
 function makeStyles(themeName = 'light') {
   const colors = themeName === 'dark' ? darkColors : lightColors;

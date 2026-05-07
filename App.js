@@ -1,11 +1,12 @@
 import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import React, { useContext, useState, useEffect, useRef } from 'react';
-import { StatusBar, View, Text, Image, AsyncStorage, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { StatusBar, View, Text, Image, AsyncStorage, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 
 import HomeScreen from './src/screens/HomeScreen';
 import DetailsScreen from './src/screens/DetailsScreen';
@@ -24,107 +25,89 @@ import { ThemeContext } from './src/context/ThemeContext';
 import { BooksProvider, useBooks } from './src/context/BooksContext';
 import { lightColors, darkColors, getColors } from './src/styles';
 import { loadTheme, saveTheme, loadOnboardingComplete, saveOnboardingComplete } from './src/utils/storage';
-import { NAVIGATION_NAMES } from './src/constants';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function LibraryStack({ navigation: parentNav }) {
   const { theme } = useContext(ThemeContext);
-  const colors = theme === 'dark' ? darkColors : lightColors;
+  const colors = getColors(theme);
   return (
     <Stack.Navigator
       screenOptions={{
         headerStyle: { backgroundColor: colors.card },
         headerTintColor: colors.text,
-        headerTitleAlign: 'center',
-        headerShown: false,
+        headerTitleStyle: { fontWeight: '600' },
       }}
     >
-      <Stack.Screen name="LibraryList">
-        {(props) => <HomeScreen {...props} />}
-      </Stack.Screen>
-      <Stack.Screen name={NAVIGATION_NAMES.DETAILS} options={{ headerShown: false }}>
-        {(props) => <DetailsScreen {...props} />}
-      </Stack.Screen>
-    </Stack.Navigator>
-  );
-}
-
-function CollectionsStack() {
-  const { theme } = useContext(ThemeContext);
-  const colors = theme === 'dark' ? darkColors : lightColors;
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerStyle: { backgroundColor: colors.card },
-        headerTintColor: colors.text,
-        headerTitleAlign: 'center',
-      }}
-    >
-      <Stack.Screen 
-        name="CollectionsList" 
-        component={CollectionsScreen}
-        options={{ title: 'Collections' }}
+      <Stack.Screen
+        name="LibraryList"
+        component={HomeScreen}
+        options={({ navigation }) => ({
+          headerLargeTitle: true,
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Favorites')}
+              style={{ padding: 8 }}
+            >
+              <Ionicons name="heart" size={24} color={colors.primary} />
+            </TouchableOpacity>
+          ),
+        })}
       />
-      <Stack.Screen 
-        name="CollectionDetail" 
-        component={CollectionDetailScreen}
-        options={{ title: 'Collection' }}
+      <Stack.Screen
+        name="Details"
+        component={DetailsScreen}
+        options={{ headerShown: false }}
       />
-      <Stack.Screen name={NAVIGATION_NAMES.DETAILS} options={{ headerShown: false }}>
-        {(props) => <DetailsScreen {...props} />}
-      </Stack.Screen>
-    </Stack.Navigator>
+      <Stack.Screen
+        name="Favorites"
+        component={FavoritesScreen}
+        options={{ title: 'Favorites' }}
+      />
+</Stack.Navigator>
   );
 }
 
 function ProfileStack() {
   const { theme } = useContext(ThemeContext);
-  const colors = theme === 'dark' ? darkColors : lightColors;
+  const colors = getColors(theme);
   return (
     <Stack.Navigator
       screenOptions={{
         headerStyle: { backgroundColor: colors.card },
         headerTintColor: colors.text,
-        headerTitleAlign: 'center',
+        headerTitleStyle: { fontWeight: '600' },
       }}
     >
-      <Stack.Screen 
-        name="ProfileMain" 
-        component={ProfileScreen}
-        options={{ title: 'Profile', headerShown: false }}
-      />
-      <Stack.Screen 
-        name="Collections" 
-        component={CollectionsStack}
-      />
-      <Stack.Screen 
-        name="Stats" 
-        component={StatsScreen}
-        options={{ title: 'Statistics' }}
-      />
-      <Stack.Screen 
-        name="Settings" 
-        component={SettingsScreen}
-        options={{ title: 'Settings' }}
-      />
-      <Stack.Screen 
-        name="About" 
-        component={AboutScreen}
-        options={{ title: 'About' }}
-      />
-      <Stack.Screen name={NAVIGATION_NAMES.DETAILS} options={{ headerShown: false }}>
-        {(props) => <DetailsScreen {...props} />}
-      </Stack.Screen>
+      <Stack.Screen name="ProfileMain" component={ProfileScreen} />
+      <Stack.Screen name="Stats" component={StatsScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
+      <Stack.Screen name="About" component={AboutScreen} options={{ title: 'About' }} />
+      <Stack.Screen name="Collections" component={CollectionsScreen} />
+      <Stack.Screen name="CollectionDetail" component={CollectionDetailScreen} />
     </Stack.Navigator>
   );
+}
+
+function getGlassTokens(themeName = 'light') {
+  return themeName === 'dark' ? {
+    tabBarBg: 'rgba(18,18,18,0.50)',
+    tabBarBorder: 'rgba(255,255,255,0.12)',
+    tabBarGlow: 'rgba(10,132,255,0.20)',
+    tabActiveChip: 'rgba(10,132,255,0.14)',
+  } : {
+    tabBarBg: 'rgba(255,255,255,0.55)',
+    tabBarBorder: 'rgba(255,255,255,0.45)',
+    tabBarGlow: 'rgba(0,122,255,0.12)',
+    tabActiveChip: 'rgba(0,122,255,0.12)',
+  };
 }
 
 function TabIconWithBadge({ routeName, focused, favoritesCount }) {
   const { theme } = useContext(ThemeContext);
   const colors = getColors(theme);
-  
+
   const getIconName = () => {
     if (routeName === 'Library') return focused ? 'library' : 'library-outline';
     if (routeName === 'Reading') return focused ? 'book' : 'book-outline';
@@ -152,9 +135,7 @@ function TabIconWithBadge({ routeName, focused, favoritesCount }) {
           alignItems: 'center',
           paddingHorizontal: 4,
         }}>
-          <Text style={{ color: '#fff', fontSize: 10, fontWeight: '600' }}>
-            {favoritesCount > 99 ? '99+' : favoritesCount}
-          </Text>
+          <Text style={{ color: '#fff', fontSize: 10, fontWeight: '600' }}>{favoritesCount}</Text>
         </View>
       )}
     </View>
@@ -166,6 +147,8 @@ function MainTabs() {
   const { getFavorites } = useBooks();
   const favoritesCount = getFavorites().length;
   const palette = getColors(theme);
+  const glass = getGlassTokens(theme);
+  const isDark = theme === 'dark';
 
   return (
     <Tab.Navigator
@@ -175,32 +158,67 @@ function MainTabs() {
         tabBarInactiveTintColor: palette.tint,
         tabBarStyle: {
           position: 'absolute',
-          bottom: 24,
+          bottom: Platform.OS === 'ios' ? 20 : 16,
           left: 20,
           right: 20,
           height: 64,
-          backgroundColor: palette.glass,
-          borderRadius: 32,
+          width: undefined,
+          backgroundColor: 'transparent',
           borderTopWidth: 0,
-          borderLeftWidth: 1,
-          borderRightWidth: 1,
-          borderBottomWidth: 1,
-          borderColor: palette.glassBorder,
-          shadowColor: '#000',
+          borderRadius: 999,
+          overflow: 'hidden',
+          shadowColor: isDark ? 'rgba(10,132,255,0.08)' : 'rgba(0,122,255,0.06)',
           shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.15,
+          shadowOpacity: isDark ? 0.12 : 0.08,
           shadowRadius: 12,
-          elevation: 10,
-          paddingBottom: 0,
-          paddingTop: 8,
+          elevation: 8,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: '500',
         },
       }}
+      tabBarBackground={() => (
+        <View style={{ position: 'absolute', width: '100%', height: '100%', overflow: 'hidden', borderRadius: 999 }}>
+          <BlurView
+            intensity={isDark ? 85 : 100}
+            tint={isDark ? 'dark' : 'light'}
+            style={{ flex: 1, borderRadius: 999 }}
+          />
+          <View
+            style={{
+              ...StyleSheet.absoluteFillObject,
+              borderRadius: 999,
+              backgroundColor: isDark ? 'rgba(18,18,20,0.32)' : 'rgba(255,255,255,0.22)',
+            }}
+          />
+          <View
+            style={{
+              position: 'absolute',
+              top: 1,
+              left: '15%',
+              right: '15%',
+              height: 20,
+              backgroundColor: 'rgba(255,255,255,0.08)',
+              borderRadius: 10,
+            }}
+          />
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 1,
+              borderTopWidth: 0.5,
+              borderTopColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.18)',
+              borderRadius: 999,
+            }}
+          />
+        </View>
+      )}
     >
-      <Tab.Screen 
+      <Tab.Screen
         name="Library"
         component={LibraryStack}
         options={{
@@ -227,7 +245,7 @@ function MainTabs() {
           ),
         }}
       />
-      <Tab.Screen 
+<Tab.Screen 
         name="Profile"
         component={ProfileStack}
         options={{
