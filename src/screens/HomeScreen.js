@@ -2,9 +2,10 @@ import React, { useState, useContext, useRef, useEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity, Modal, TextInput, FlatList, KeyboardAvoidingView, Platform, ScrollView, Image, ActivityIndicator, Alert, Animated, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import * as ImagePicker from 'expo-image-picker';
 import PropTypes from 'prop-types';
-import { getStyles, getColors } from '../styles';
+import { getStyles, getColors, getGlassTokens } from '../styles';
 import { ThemeContext } from '../context/ThemeContext';
 import { useBooks } from '../context/BooksContext';
 import { UI_CONFIG, SORT_OPTIONS, FILTER_OPTIONS, BOOK_STATUS } from '../constants';
@@ -27,6 +28,7 @@ function HomeScreen({ navigation }) {
   const [showSortFilter, setShowSortFilter] = useState(false);
   const [viewMode, setViewMode] = useState('list');
   const [collectionFilter, setCollectionFilter] = useState(null);
+  const [searchFocus, setSearchFocus] = useState(false);
   const debounceTimeout = useRef(null);
 
   const { theme } = useContext(ThemeContext);
@@ -34,6 +36,7 @@ function HomeScreen({ navigation }) {
 
   const styles = getStyles(theme);
   const colors = getColors(theme);
+  const glassTokens = getGlassTokens(theme);
 
   useEffect(() => {
     if (debounceTimeout.current) {
@@ -259,31 +262,46 @@ function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={styles.screen}>
-      <View style={[styles.searchWrapper, { margin: 12 }]}>
-        <TextInput
-          placeholder="Search by title or author"
-          placeholderTextColor={colors.tint}
-          value={query}
-          onChangeText={setQuery}
-          style={styles.searchInput}
-          accessibilityLabel="Search books by title or author"
-          accessibilityHint="Enter book title or author name to search"
-        />
+      <View style={[
+        styles.searchWrapper,
+        {
+          margin: 12,
+          backgroundColor: glassTokens.inputBg,
+          borderColor: searchFocus ? 'rgba(0,122,255,0.50)' : glassTokens.inputBorder,
+          shadowColor: searchFocus ? '#007AFF' : 'transparent',
+          shadowOpacity: searchFocus ? 0.15 : 0,
+          shadowRadius: searchFocus ? 8 : 0,
+        }
+      ]}>
+        <BlurView intensity={40} tint={theme === 'dark' ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+        <View style={StyleSheet.absoluteFill}>
+          <TextInput
+            placeholder="Search by title or author"
+            placeholderTextColor={colors.tint}
+            value={query}
+            onChangeText={setQuery}
+            onFocus={() => setSearchFocus(true)}
+            onBlur={() => setSearchFocus(false)}
+            style={[styles.searchInput, { backgroundColor: 'transparent' }]}
+            accessibilityLabel="Search books by title or author"
+            accessibilityHint="Enter book title or author name to search"
+          />
+        </View>
       </View>
 
       <View style={{ flexDirection: 'row', paddingHorizontal: 12, marginBottom: 8 }}>
         <TouchableOpacity
           onPress={() => setShowSortFilter(!showSortFilter)}
-          style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 6, paddingHorizontal: 10, backgroundColor: colors.card, borderRadius: 6 }}
+          style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 8, paddingHorizontal: 12, backgroundColor: glassTokens.chipBg, borderWidth: 1, borderColor: glassTokens.chipBorder, borderRadius: 20 }}
           accessibilityLabel="Sort and filter options"
           accessibilityRole="button"
         >
-          <Ionicons name="options" size={16} color={colors.text} />
+          <Ionicons name="options-outline" size={16} color={colors.text} />
           <Text style={{ color: colors.text, marginLeft: 6, fontSize: 14 }}>Sort/Filter</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
-          style={{ marginLeft: 8, paddingVertical: 6, paddingHorizontal: 10, backgroundColor: colors.card, borderRadius: 6 }}
+          style={{ marginLeft: 8, paddingVertical: 8, paddingHorizontal: 12, backgroundColor: glassTokens.chipBg, borderWidth: 1, borderColor: glassTokens.chipBorder, borderRadius: 20 }}
           accessibilityLabel={`Switch to ${viewMode === 'list' ? 'grid' : 'list'} view`}
           accessibilityRole="button"
         >
@@ -316,7 +334,7 @@ function HomeScreen({ navigation }) {
                 <TouchableOpacity
                   key={opt.value}
                   onPress={() => setSortBy(opt.value)}
-                  style={{ paddingVertical: 6, paddingHorizontal: 12, marginRight: 8, marginBottom: 4, borderRadius: 16, backgroundColor: sortBy === opt.value ? colors.primary : colors.card }}
+                  style={{ paddingVertical: 8, paddingHorizontal: 14, marginRight: 8, marginBottom: 4, borderRadius: 20, backgroundColor: sortBy === opt.value ? colors.primary : glassTokens.chipBg, borderWidth: sortBy === opt.value ? 0 : 1, borderColor: glassTokens.chipBorder }}
                 >
                   <Text style={{ color: sortBy === opt.value ? colors.buttonText : colors.text, fontSize: 12 }}>{opt.label}</Text>
                 </TouchableOpacity>
@@ -335,7 +353,7 @@ function HomeScreen({ navigation }) {
                 <TouchableOpacity
                   key={opt.value}
                   onPress={() => setFilterBy(opt.value)}
-                  style={{ paddingVertical: 6, paddingHorizontal: 12, marginRight: 8, marginBottom: 4, borderRadius: 16, backgroundColor: filterBy === opt.value ? colors.primary : colors.card }}
+                  style={{ paddingVertical: 8, paddingHorizontal: 14, marginRight: 8, marginBottom: 4, borderRadius: 20, backgroundColor: filterBy === opt.value ? colors.primary : glassTokens.chipBg, borderWidth: filterBy === opt.value ? 0 : 1, borderColor: glassTokens.chipBorder }}
                 >
                   <Text style={{ color: filterBy === opt.value ? colors.buttonText : colors.text, fontSize: 12 }}>{opt.label}</Text>
                 </TouchableOpacity>
@@ -348,11 +366,11 @@ function HomeScreen({ navigation }) {
       {collections.length > 0 && (
         <View style={{ paddingHorizontal: 12, marginBottom: 8 }}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity onPress={() => setCollectionFilter(null)} style={{ paddingVertical: 6, paddingHorizontal: 12, marginRight: 8, borderRadius: 16, backgroundColor: collectionFilter === null ? colors.primary : colors.card }}>
+            <TouchableOpacity onPress={() => setCollectionFilter(null)} style={{ paddingVertical: 8, paddingHorizontal: 14, marginRight: 8, borderRadius: 20, backgroundColor: collectionFilter === null ? colors.primary : glassTokens.chipBg, borderWidth: collectionFilter === null ? 0 : 1, borderColor: glassTokens.chipBorder }}>
               <Text style={{ color: collectionFilter === null ? colors.buttonText : colors.text, fontSize: 12 }}>All</Text>
             </TouchableOpacity>
             {collections.map(collection => (
-              <TouchableOpacity key={collection.id} onPress={() => setCollectionFilter(collection.id)} style={{ paddingVertical: 6, paddingHorizontal: 12, marginRight: 8, borderRadius: 16, backgroundColor: collectionFilter === collection.id ? colors.primary : colors.card }}>
+              <TouchableOpacity key={collection.id} onPress={() => setCollectionFilter(collection.id)} style={{ paddingVertical: 8, paddingHorizontal: 14, marginRight: 8, borderRadius: 20, backgroundColor: collectionFilter === collection.id ? colors.primary : glassTokens.chipBg, borderWidth: collectionFilter === collection.id ? 0 : 1, borderColor: glassTokens.chipBorder }}>
                 <Text style={{ color: collectionFilter === collection.id ? colors.buttonText : colors.text, fontSize: 12 }}>{collection.name}</Text>
               </TouchableOpacity>
             ))}

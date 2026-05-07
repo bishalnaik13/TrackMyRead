@@ -136,15 +136,16 @@ function makeStyles(themeName = 'light') {
     searchWrapper: {
       borderRadius: 24,
       overflow: 'hidden',
-      backgroundColor: colors.card,
+      height: 48,
       borderWidth: 1,
       borderColor: colors.neutral,
     },
     searchInput: {
+      flex: 1,
       paddingHorizontal: 16,
-      paddingVertical: 14,
-      backgroundColor: colors.card,
+      paddingVertical: 12,
       color: colors.text,
+      fontSize: 16,
     },
 
     row: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 },
