@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getStyles, getColors } from '../styles';
+import { getStyles, getColors, getGlassTokens } from '../styles';
 import { ThemeContext } from '../context/ThemeContext';
 import { useBooks } from '../context/BooksContext';
 import { BOOK_STATUS } from '../constants';
@@ -16,10 +16,11 @@ export default function DiscoverScreen({ navigation }) {
     addBook, 
     setStatus,
   } = useBooks();
-  
+
   const styles = getStyles(theme);
   const colors = getColors(theme);
-  
+  const glassTokens = getGlassTokens(theme);
+
   const toReadBooks = getBooksByStatus(BOOK_STATUS.TO_READ);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
 
@@ -49,7 +50,7 @@ export default function DiscoverScreen({ navigation }) {
 
   const renderBookCard = ({ item }) => {
     return (
-      <View style={[styles.card, { marginBottom: 12 }]}>
+      <View style={[styles.card, { marginBottom: 12, backgroundColor: glassTokens.cardBg, borderColor: glassTokens.cardBorder, borderWidth: 1 }]}>
         <View style={{ flexDirection: 'row' }}>
           <View style={styles.cardLeft}>
             {item.coverUrl ? (

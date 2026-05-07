@@ -2,7 +2,7 @@ import React, { useContext, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getStyles, getColors } from '../styles';
+import { getStyles, getColors, getGlassTokens } from '../styles';
 import { ThemeContext } from '../context/ThemeContext';
 import { useBooks } from '../context/BooksContext';
 import { SORT_OPTIONS } from '../constants';
@@ -16,6 +16,7 @@ function CollectionDetailScreen({ route, navigation }) {
 
   const styles = getStyles(theme);
   const colors = getColors(theme);
+  const glassTokens = getGlassTokens(theme);
 
   const books = useMemo(() => {
     return getBooksInCollection(collectionId);
@@ -29,7 +30,7 @@ function CollectionDetailScreen({ route, navigation }) {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      style={styles.card}
+      style={[styles.card, { backgroundColor: glassTokens.cardBg, borderColor: glassTokens.cardBorder, borderWidth: 1 }]}
       onPress={() => navigation.navigate('Details', { bookId: item.id })}
       accessibilityLabel={`Book: ${item.title}`}
       accessibilityRole="button"

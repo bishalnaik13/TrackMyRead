@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getStyles, getColors } from '../styles';
+import { getStyles, getColors, getGlassTokens } from '../styles';
 import { ThemeContext } from '../context/ThemeContext';
 import { useBooks } from '../context/BooksContext';
 import { BOOK_STATUS } from '../constants';
@@ -11,16 +11,17 @@ import ProgressBottomSheet from '../components/ProgressBottomSheet';
 
 export default function ReadingNowScreen({ navigation }) {
   const { theme } = useContext(ThemeContext);
-  const { 
-    getCurrentlyReading, 
-    calculateProgress, 
-    setProgress, 
+  const {
+    getCurrentlyReading,
+    calculateProgress,
+    setProgress,
     calculateStreak,
     setStatus,
   } = useBooks();
-  
+
   const styles = getStyles(theme);
   const colors = getColors(theme);
+  const glassTokens = getGlassTokens(theme);
   
   const currentlyReading = getCurrentlyReading();
   const streak = calculateStreak();
@@ -49,7 +50,7 @@ export default function ReadingNowScreen({ navigation }) {
       : 'Never';
 
     return (
-      <View style={[styles.card, { marginBottom: 12, flexDirection: 'column', alignItems: 'stretch' }]}>
+      <View style={[styles.card, { marginBottom: 12, flexDirection: 'column', alignItems: 'stretch', backgroundColor: glassTokens.cardBg, borderColor: glassTokens.cardBorder, borderWidth: 1 }]}>
         <View style={{ flexDirection: 'row' }}>
           <View style={styles.cardLeft}>
             {item.coverUrl ? (
@@ -68,17 +69,17 @@ export default function ReadingNowScreen({ navigation }) {
             </Text>
           </View>
         </View>
-        
+
         {item.currentPage && item.totalPages && (
           <View style={{ marginTop: 12 }}>
-            <View style={{ height: 6, backgroundColor: colors.neutral, borderRadius: 3, overflow: 'hidden' }}>
-              <View 
-                style={{ 
-                  height: 6, 
-                  width: `${progress}%`, 
-                  backgroundColor: colors.primary, 
-                  borderRadius: 3 
-                }} 
+            <View style={{ height: 3, backgroundColor: 'rgba(0,122,255,0.12)', borderRadius: 2, overflow: 'hidden' }}>
+              <View
+                style={{
+                  height: 3,
+                  width: `${progress}%`,
+                  backgroundColor: colors.primary,
+                  borderRadius: 2
+                }}
               />
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 }}>

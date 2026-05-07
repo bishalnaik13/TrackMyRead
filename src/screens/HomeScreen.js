@@ -37,6 +37,7 @@ function HomeScreen({ navigation }) {
   const styles = getStyles(theme);
   const colors = getColors(theme);
   const glassTokens = getGlassTokens(theme);
+  const goldColor = theme === 'dark' ? '#FFD700' : '#FFD700';
 
   useEffect(() => {
     if (debounceTimeout.current) {
@@ -129,6 +130,7 @@ function HomeScreen({ navigation }) {
   function SwipeableRow({ item, children, onDelete, onToggleFavorite }) {
     const translateX = useRef(new Animated.Value(0)).current;
     const [isOpen, setIsOpen] = useState(false);
+    const isOpenRef = useRef(false);
 
     function handleSwipe(direction) {
       if (direction === 'left') {
@@ -136,6 +138,7 @@ function HomeScreen({ navigation }) {
           toValue: -100,
           useNativeDriver: true,
         }).start();
+        isOpenRef.current = true;
         setIsOpen(true);
       } else if (direction === 'right') {
         if (isOpen) {
@@ -143,6 +146,7 @@ function HomeScreen({ navigation }) {
             toValue: 0,
             useNativeDriver: true,
           }).start();
+          isOpenRef.current = false;
           setIsOpen(false);
         } else {
           onToggleFavorite();
@@ -156,16 +160,21 @@ function HomeScreen({ navigation }) {
           toValue: 0,
           useNativeDriver: true,
         }).start();
+        isOpenRef.current = false;
+        setIsOpen(false);
         onDelete();
       } else if (action === 'favorite') {
         onToggleFavorite();
       }
+      isOpenRef.current = false;
       setIsOpen(false);
     }
 
+    const getSwipeVisibility = () => isOpenRef.current;
+
     return (
       <View style={{ marginBottom: 10 }}>
-        <View style={styles.swipeActions}>
+        <View style={[styles.swipeActions, { opacity: isOpen ? 1 : 0 }]}>
           <TouchableOpacity
             style={[styles.swipeAction, { backgroundColor: colors.destructive }]}
             onPress={() => handleActionPress('delete')}
@@ -185,7 +194,10 @@ function HomeScreen({ navigation }) {
             <Text style={{ color: '#fff', fontSize: 10, marginTop: 2 }}>{item.favorite ? 'Unfavorite' : 'Favorite'}</Text>
           </TouchableOpacity>
         </View>
-        <Animated.View style={{ transform: [{ translateX }] }}>
+        <Animated.View style={[{
+          transform: [{ translateX }],
+          opacity: isOpen ? 0.7 : 1,
+        }]}>
           {children}
         </Animated.View>
       </View>
@@ -224,17 +236,17 @@ function HomeScreen({ navigation }) {
                     key={star}
                     name={star <= item.rating ? 'star' : 'star-outline'}
                     size={12}
-                    color={star <= item.rating ? '#FFD700' : colors.tint}
+                    color={star <= item.rating ? goldColor : colors.tint}
                   />
                 ))}
               </View>
             )}
             {item.status === BOOK_STATUS.READING && item.currentPage && item.totalPages && (
               <View style={{ marginTop: 6 }}>
-                <View style={{ height: 4, backgroundColor: colors.neutral, borderRadius: 2 }}>
+                <View style={{ height: 3, backgroundColor: 'rgba(0,122,255,0.12)', borderRadius: 2 }}>
                   <View
                     style={{
-                      height: 4,
+                      height: 3,
                       width: `${calculateProgress(item.currentPage, item.totalPages)}%`,
                       backgroundColor: colors.primary,
                       borderRadius: 2,
@@ -247,14 +259,6 @@ function HomeScreen({ navigation }) {
               </View>
             )}
           </View>
-          <TouchableOpacity
-            onPress={() => toggleFavorite(item.id)}
-            style={{ padding: 8 }}
-            accessibilityLabel={item.favorite ? `Remove ${item.title} from favorites` : `Add ${item.title} to favorites`}
-            accessibilityRole="button"
-          >
-            <Ionicons name={item.favorite ? 'heart' : 'heart-outline'} size={22} color={item.favorite ? colors.accent : colors.tint} />
-          </TouchableOpacity>
         </TouchableOpacity>
       </SwipeableRow>
     );
@@ -406,12 +410,12 @@ function HomeScreen({ navigation }) {
               renderItem={({ item }) => (
                 <TouchableOpacity
                   onPress={() => navigation.navigate('Details', { bookId: item.id })}
-                  style={{ flex: 1, margin: 6, borderRadius: 10, overflow: 'hidden', backgroundColor: colors.card }}
+                  style={{ flex: 1, margin: 6, borderRadius: 16, overflow: 'hidden', backgroundColor: theme === 'dark' ? 'rgba(38,38,40,0.80)' : 'rgba(255,255,255,0.82)', borderWidth: 1, borderColor: theme === 'dark' ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.50)' }}
                   accessibilityLabel={`Book: ${item.title}`}
                   accessibilityRole="button"
                 >
                   {item.coverUrl ? (
-                    <Image source={{ uri: item.coverUrl }} style={{ width: '100%', height: 140 }} resizeMode="cover" />
+                    <Image source={{ uri: item.coverUrl }} style={{ width: '100%', height: 140, margin: 6, borderRadius: 10 }} resizeMode="cover" />
                   ) : (
                     <View style={{ width: '100%', height: 140, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }}>
                       <Ionicons name="book" size={32} color="#fff" />
@@ -427,14 +431,14 @@ function HomeScreen({ navigation }) {
                             key={star}
                             name={star <= item.rating ? 'star' : 'star-outline'}
                             size={10}
-                            color={star <= item.rating ? '#FFD700' : colors.tint}
+                            color={star <= item.rating ? goldColor : colors.tint}
                           />
                         ))}
                       </View>
                     )}
                     {item.status === BOOK_STATUS.READING && item.currentPage && item.totalPages && (
                       <View style={{ marginTop: 4 }}>
-                        <View style={{ height: 3, backgroundColor: colors.neutral, borderRadius: 1.5 }}>
+                        <View style={{ height: 3, backgroundColor: 'rgba(0,122,255,0.12)', borderRadius: 1.5 }}>
                           <View
                             style={{
                               height: 3,

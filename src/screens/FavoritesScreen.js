@@ -3,7 +3,7 @@ import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import PropTypes from 'prop-types';
-import { getStyles, getColors } from '../styles';
+import { getStyles, getColors, getGlassTokens } from '../styles';
 import { ThemeContext } from '../context/ThemeContext';
 import { useBooks } from '../context/BooksContext';
 import { navigationShape } from '../types';
@@ -15,13 +15,14 @@ function FavoritesScreen({ navigation }) {
 
   const styles = getStyles(theme);
   const colors = getColors(theme);
+  const glassTokens = getGlassTokens(theme);
   const favs = getFavorites();
 
   function renderItem({ item }) {
     return (
       <TouchableOpacity
         onPress={() => navigation.navigate('Library', { screen: 'Details', params: { bookId: item.id } })}
-        style={styles.card}
+        style={[styles.card, { backgroundColor: glassTokens.cardBg, borderColor: glassTokens.cardBorder, borderWidth: 1 }]}
         accessibilityLabel={`Favorite book: ${item.title} by ${item.author || 'unknown author'}`}
         accessibilityRole="button"
       >
