@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import React, { useContext, useState, useEffect, useRef } from 'react';
-import { StatusBar, View, Text, Image, AsyncStorage, TouchableOpacity } from 'react-native';
+import { StatusBar, View, Text, Image, AsyncStorage, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -41,7 +41,7 @@ function LibraryStack({ navigation: parentNav }) {
         headerShown: false,
       }}
     >
-      <Stack.Screen name={NAVIGATION_NAMES.LIBRARY}>
+      <Stack.Screen name="LibraryList">
         {(props) => <HomeScreen {...props} />}
       </Stack.Screen>
       <Stack.Screen name={NAVIGATION_NAMES.DETAILS} options={{ headerShown: false }}>
@@ -296,7 +296,8 @@ function OnboardingWrapper({ onComplete }) {
   const { theme } = useContext(ThemeContext);
   const colors = theme === 'dark' ? darkColors : lightColors;
   const [step, setStep] = useState(0);
-  const [goal, setGoal] = useState('');
+  const [goalInput, setGoalInput] = useState('');
+  const [bookTitle, setBookTitle] = useState('');
   const { addBook } = useBooks();
 
   const handleNext = () => {
@@ -313,7 +314,7 @@ function OnboardingWrapper({ onComplete }) {
 
   const handleSetGoal = async () => {
     const { saveReadingGoal } = require('./src/utils/storage');
-    const goalNum = parseInt(goal, 10);
+    const goalNum = parseInt(goalInput, 10);
     if (!isNaN(goalNum) && goalNum > 0) {
       await saveReadingGoal(goalNum);
     }
@@ -321,8 +322,8 @@ function OnboardingWrapper({ onComplete }) {
   };
 
   const handleAddFirstBook = () => {
-    if (goal.trim()) {
-      addBook(goal.trim());
+    if (bookTitle.trim()) {
+      addBook(bookTitle.trim());
     }
     onComplete();
   };
@@ -367,12 +368,27 @@ function OnboardingWrapper({ onComplete }) {
       )}
 
       {step === 1 && (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 }}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 }}>
           <Text style={{ fontSize: 24, fontWeight: '600', color: colors.text, marginBottom: 24, textAlign: 'center' }}>
-            What's your reading goal for this year?
+            How many books do you want to read this year?
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 40 }}>
-            <Text style={{ fontSize: 48, fontWeight: '700', color: colors.primary }}>12</Text>
+            <TextInput
+              value={goalInput}
+              onChangeText={setGoalInput}
+              keyboardType="numeric"
+              placeholder="0"
+              placeholderTextColor={colors.tint}
+              style={{ 
+                fontSize: 48, 
+                fontWeight: '700', 
+                color: colors.primary, 
+                textAlign: 'center',
+                minWidth: 80,
+                borderBottomWidth: 2,
+                borderBottomColor: colors.primary,
+              }}
+            />
             <Text style={{ fontSize: 18, color: colors.tint, marginLeft: 8 }}>books</Text>
           </View>
           <View style={{ flexDirection: 'row' }}>
@@ -389,17 +405,35 @@ function OnboardingWrapper({ onComplete }) {
               <Text style={{ color: colors.buttonText, fontSize: 16, fontWeight: '600' }}>Continue</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       )}
 
       {step === 2 && (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 }}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 }}>
           <Text style={{ fontSize: 24, fontWeight: '600', color: colors.text, marginBottom: 24, textAlign: 'center' }}>
             Add your first book
           </Text>
-          <Text style={{ fontSize: 14, color: colors.tint, marginBottom: 40, textAlign: 'center' }}>
-            Tap the + button to add books to your library
+          <Text style={{ fontSize: 14, color: colors.tint, marginBottom: 16, textAlign: 'center' }}>
+            Enter the title of a book you're excited to read
           </Text>
+          <TextInput
+            value={bookTitle}
+            onChangeText={setBookTitle}
+            placeholder="Book title"
+            placeholderTextColor={colors.tint}
+            style={{ 
+              width: '100%',
+              paddingHorizontal: 16,
+              paddingVertical: 14,
+              borderRadius: 10,
+              borderWidth: 1,
+              borderColor: colors.neutral,
+              backgroundColor: colors.card,
+              color: colors.text,
+              fontSize: 16,
+              marginBottom: 40,
+            }}
+          />
           <View style={{ flexDirection: 'row' }}>
             <TouchableOpacity 
               style={{ paddingVertical: 14, paddingHorizontal: 24 }}
@@ -414,7 +448,7 @@ function OnboardingWrapper({ onComplete }) {
               <Text style={{ color: colors.buttonText, fontSize: 16, fontWeight: '600' }}>Add Book</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       )}
     </View>
   );
