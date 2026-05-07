@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { getColors } from '../styles';
 
 export default function EmptyState({ 
   icon = 'book-outline', 
@@ -10,11 +11,7 @@ export default function EmptyState({
   onAction,
   theme = 'light'
 }) {
-  const colors = {
-    text: theme === 'dark' ? '#e6e6e6' : '#121212',
-    tint: theme === 'dark' ? '#9ca3af' : '#666666',
-    primary: theme === 'dark' ? '#0A84FF' : '#007aff',
-  };
+  const colors = getColors(theme);
 
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
@@ -45,11 +42,11 @@ export default function EmptyState({
             paddingVertical: 12,
             paddingHorizontal: 24,
             backgroundColor: colors.primary,
-            borderRadius: 8,
+            borderRadius: 12,
           }}
           onPress={onAction}
         >
-          <Text style={{ color: '#fff', fontWeight: '600' }}>{actionLabel}</Text>
+          <Text style={{ color: colors.buttonText, fontWeight: '600' }}>{actionLabel}</Text>
         </TouchableOpacity>
       )}
     </View>

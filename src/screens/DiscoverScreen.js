@@ -120,7 +120,7 @@ export default function DiscoverScreen({ navigation }) {
       </ScrollView>
 
       <TouchableOpacity
-        style={[styles.fab, { bottom: 16, right: 16 }]}
+        style={styles.fab}
         onPress={() => setShowQuickAdd(true)}
       >
         <Ionicons name="add" size={28} color={colors.buttonText} />

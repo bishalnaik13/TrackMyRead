@@ -1,14 +1,9 @@
 import React from 'react';
 import { View, Text, Animated, StyleSheet } from 'react-native';
+import { getColors } from '../styles';
 
 export default function LoadingState({ theme = 'light', message = 'Loading...' }) {
-  const colors = {
-    background: theme === 'dark' ? '#282828' : '#FFFFFF',
-    text: theme === 'dark' ? '#e6e6e6' : '#121212',
-    tint: theme === 'dark' ? '#9ca3af' : '#666666',
-    shimmer: theme === 'dark' ? '#3a3a3a' : '#f0f0f0',
-    primary: theme === 'dark' ? '#0A84FF' : '#007aff',
-  };
+  const colors = getColors(theme);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -21,9 +16,7 @@ export default function LoadingState({ theme = 'light', message = 'Loading...' }
 }
 
 function SkeletonLoader({ theme = 'light' }) {
-  const colors = {
-    shimmer: theme === 'dark' ? '#3a3a3a' : '#f0f0f0',
-  };
+  const colors = getColors(theme);
 
   const animatedValue = React.useRef(new Animated.Value(0)).current;
 
@@ -56,7 +49,7 @@ function SkeletonLoader({ theme = 'light' }) {
           key={i}
           style={[
             styles.skeletonItem,
-            { backgroundColor: colors.shimmer, opacity }
+            { backgroundColor: colors.placeholder, opacity }
           ]}
         />
       ))}

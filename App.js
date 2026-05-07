@@ -22,7 +22,7 @@ import Snackbar from './src/components/Snackbar';
 
 import { ThemeContext } from './src/context/ThemeContext';
 import { BooksProvider, useBooks } from './src/context/BooksContext';
-import { lightColors, darkColors } from './src/styles';
+import { lightColors, darkColors, getColors } from './src/styles';
 import { loadTheme, saveTheme, loadOnboardingComplete, saveOnboardingComplete } from './src/utils/storage';
 import { NAVIGATION_NAMES } from './src/constants';
 
@@ -122,6 +122,9 @@ function ProfileStack() {
 }
 
 function TabIconWithBadge({ routeName, focused, favoritesCount }) {
+  const { theme } = useContext(ThemeContext);
+  const colors = getColors(theme);
+  
   const getIconName = () => {
     if (routeName === 'Library') return focused ? 'library' : 'library-outline';
     if (routeName === 'Reading') return focused ? 'book' : 'book-outline';
@@ -135,13 +138,13 @@ function TabIconWithBadge({ routeName, focused, favoritesCount }) {
 
   return (
     <View style={{ position: 'relative' }}>
-      <Ionicons name={iconName} size={24} color={focused ? '#007AFF' : '#666666'} />
+      <Ionicons name={iconName} size={24} color={focused ? colors.primary : colors.tint} />
       {showBadge && (
         <View style={{
           position: 'absolute',
           top: -4,
           right: -8,
-          backgroundColor: '#E91E63',
+          backgroundColor: colors.accent,
           borderRadius: 8,
           minWidth: 16,
           height: 16,
@@ -162,17 +165,38 @@ function MainTabs() {
   const { theme } = useContext(ThemeContext);
   const { getFavorites } = useBooks();
   const favoritesCount = getFavorites().length;
-  const palette = theme === 'dark' ? darkColors : lightColors;
+  const palette = getColors(theme);
 
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: palette.primary,
-        tabBarInactiveTintColor: palette.text,
-        tabBarStyle: { 
-          backgroundColor: palette.card,
-          borderTopColor: palette.neutral,
+        tabBarInactiveTintColor: palette.tint,
+        tabBarStyle: {
+          position: 'absolute',
+          bottom: 24,
+          left: 20,
+          right: 20,
+          height: 64,
+          backgroundColor: palette.glass,
+          borderRadius: 32,
+          borderTopWidth: 0,
+          borderLeftWidth: 1,
+          borderRightWidth: 1,
+          borderBottomWidth: 1,
+          borderColor: palette.glassBorder,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.15,
+          shadowRadius: 12,
+          elevation: 10,
+          paddingBottom: 0,
+          paddingTop: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '500',
         },
       }}
     >
