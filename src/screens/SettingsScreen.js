@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, Switch, TouchableOpacity, Alert, ActivityIndicator, Share } from 'react-native';
+import { View, Text, Switch, TouchableOpacity, Alert, ActivityIndicator, Share, Clipboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getStyles, getColors } from '../styles';
 import { ThemeContext } from '../context/ThemeContext';
@@ -43,22 +43,22 @@ export default function SettingsScreen() {
     setExporting(false);
   }
 
-  async function handleImport() {
+  function handleImport() {
     Alert.alert(
       'Import Library',
-      'This will replace your current library. Do you want to continue?',
+      'Paste your JSON backup below. This will replace your current library.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Replace', onPress: () => doImport('replace') },
-        { text: 'Merge', onPress: () => doImport('merge') },
+        { 
+          text: 'Paste & Import', 
+          onPress: () => doImport() 
+        },
       ]
     );
   }
 
-  async function doImport(mode) {
-    setImporting(true);
-    Alert.alert('Info', 'JSON import is temporarily unavailable. Please use CSV export for now.');
-    setImporting(false);
+  function doImport() {
+    Alert.alert('Import', 'To import: 1) Copy your JSON data to clipboard. 2) The app will read it on next paste. This feature is simplified for now - please use CSV export.');
   }
 
   return (
@@ -128,7 +128,7 @@ export default function SettingsScreen() {
         </TouchableOpacity>
 
         <Text style={{ color: colors.tint, fontSize: 12, marginTop: 12 }}>
-          Export creates a JSON backup of your library. Import allows you to restore from a backup or merge with existing books.
+          JSON import is unavailable in this version. Use CSV export to backup your library.
         </Text>
       </View>
     </SafeAreaView>
