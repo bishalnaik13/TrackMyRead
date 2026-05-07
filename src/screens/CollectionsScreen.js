@@ -10,9 +10,11 @@ import EmptyState from '../components/EmptyState';
 
 export default function CollectionsScreen({ navigation }) {
   const { theme } = useContext(ThemeContext);
-  const { collections, addCollection, deleteCollection, getBooksInCollection } = useBooks();
+  const { collections, addCollection, deleteCollection, getBooksInCollection, renameCollection } = useBooks();
   const [showModal, setShowModal] = useState(false);
   const [newName, setNewName] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [editName, setEditName] = useState('');
 
   const styles = getStyles(theme);
   const colors = getColors(theme);
@@ -42,6 +44,27 @@ export default function CollectionsScreen({ navigation }) {
     );
   };
 
+  const handleRename = (id, name) => {
+    setEditingId(id);
+    setEditName(name);
+    setShowModal(true);
+  };
+
+  const handleSaveRename = () => {
+    if (!editName.trim()) {
+      Alert.alert('Error', 'Please enter a collection name');
+      return;
+    }
+    if (editName.trim().length > MAX_COLLECTION_NAME_LENGTH) {
+      Alert.alert('Error', `Name must be ${MAX_COLLECTION_NAME_LENGTH} characters or less`);
+      return;
+    }
+    renameCollection(editingId, editName.trim());
+    setEditingId(null);
+    setEditName('');
+    setShowModal(false);
+  };
+
   const renderItem = ({ item }) => {
     const bookCount = getBooksInCollection(item.id).length;
     return (
@@ -57,6 +80,13 @@ export default function CollectionsScreen({ navigation }) {
             <Text style={[styles.cardMeta, { marginTop: 4 }]}>{bookCount} book{bookCount !== 1 ? 's' : ''}</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity
+              onPress={() => handleRename(item.id, item.name)}
+              style={{ padding: 8 }}
+              accessibilityLabel={`Rename collection ${item.name}`}
+            >
+              <Ionicons name="pencil" size={20} color={colors.tint} />
+            </TouchableOpacity>
             <TouchableOpacity
               onPress={() => handleDelete(item.id, item.name)}
               style={{ padding: 8 }}
@@ -92,7 +122,11 @@ export default function CollectionsScreen({ navigation }) {
 
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => setShowModal(true)}
+        onPress={() => {
+          setEditingId(null);
+          setNewName('');
+          setShowModal(true);
+        }}
         accessibilityLabel="Create new collection"
         accessibilityRole="button"
       >
@@ -103,11 +137,11 @@ export default function CollectionsScreen({ navigation }) {
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 }}>
           <View style={{ backgroundColor: colors.card, borderRadius: 12, padding: 20 }}>
             <Text style={{ fontSize: 20, fontWeight: '600', color: colors.text, marginBottom: 16 }}>
-              New Collection
+              {editingId ? 'Rename Collection' : 'New Collection'}
             </Text>
             <TextInput
-              value={newName}
-              onChangeText={setNewName}
+              value={editingId ? editName : newName}
+              onChangeText={editingId ? setEditName : setNewName}
               placeholder="Collection name"
               placeholderTextColor={colors.tint}
               maxLength={MAX_COLLECTION_NAME_LENGTH}
@@ -122,20 +156,25 @@ export default function CollectionsScreen({ navigation }) {
               autoFocus
             />
             <Text style={{ color: colors.tint, fontSize: 12, marginTop: 4, textAlign: 'right' }}>
-              {newName.length}/{MAX_COLLECTION_NAME_LENGTH}
+              {(editingId ? editName : newName).length}/{MAX_COLLECTION_NAME_LENGTH}
             </Text>
             <View style={{ flexDirection: 'row', marginTop: 20, justifyContent: 'space-between' }}>
               <TouchableOpacity
-                onPress={() => { setNewName(''); setShowModal(false); }}
+                onPress={() => { 
+                  setEditingId(null);
+                  setNewName(''); 
+                  setEditName('');
+                  setShowModal(false); 
+                }}
                 style={{ paddingVertical: 12, paddingHorizontal: 20 }}
               >
                 <Text style={{ color: colors.tint }}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={handleCreate}
+                onPress={editingId ? handleSaveRename : handleCreate}
                 style={{ backgroundColor: colors.primary, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 8 }}
               >
-                <Text style={{ color: colors.buttonText, fontWeight: '600' }}>Create</Text>
+                <Text style={{ color: colors.buttonText, fontWeight: '600' }}>{editingId ? 'Save' : 'Create'}</Text>
               </TouchableOpacity>
             </View>
           </View>
