@@ -329,6 +329,41 @@ export function BooksProvider({ children }) {
       .slice(0, limit);
   }, [books]);
 
+  const getCurrentlyReading = useCallback(() => {
+    return books
+      .filter(b => b.status === BOOK_STATUS.READING)
+      .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  }, [books]);
+
+  const calculateStreak = useCallback(() => {
+    if (books.length === 0) return 0;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayMs = today.getTime();
+    
+    const updateDates = new Set();
+    books.forEach(book => {
+      if (book.updatedAt) {
+        const date = new Date(book.updatedAt);
+        date.setHours(0, 0, 0, 0);
+        updateDates.add(date.getTime());
+      }
+    });
+    
+    if (updateDates.size === 0) return 0;
+    
+    let streak = 0;
+    let checkDate = todayMs;
+    
+    while (updateDates.has(checkDate)) {
+      streak++;
+      checkDate -= 24 * 60 * 60 * 1000;
+    }
+    
+    return streak;
+  }, [books]);
+
   const getBooksByStatus = useCallback((status) => {
     return books.filter(b => b.status === status);
   }, [books]);
@@ -351,6 +386,8 @@ export function BooksProvider({ children }) {
     sortBooks,
     filterBooks,
     getRecentlyUpdated,
+    getCurrentlyReading,
+    calculateStreak,
     getBooksByStatus,
     trash,
     fetchBookCover,
